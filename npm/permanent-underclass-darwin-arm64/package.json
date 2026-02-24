@@ -3,6 +3,10 @@
   "version": "0.1.0-beta.24",
   "description": "Darwin arm64 binary for permanent-underclass",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DhvanilPatel/permanent-underclass"
+  },
   "os": [
     "darwin"
   ],
