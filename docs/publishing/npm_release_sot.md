@@ -1,6 +1,6 @@
 # Permanent Underclass NPM Release SOT
 
-Last updated: 2026-02-22
+Last updated: 2026-02-24
 Status: canonical; replaces older release notes.
 
 ## What Is Canonical
@@ -37,10 +37,11 @@ Release workflow: `.github/workflows/release-npm.yml`
    - `scripts/publish_npm_release.sh <version> <dist-tag>`
 5. Current platform scope in CI is intentionally:
    - `darwin-arm64`
+   - `darwin-x64`
    - `linux-x64`
-6. Current provenance setting in CI is intentionally:
-   - `PU_NPM_PROVENANCE=false`
-   - Reason: repository is private; npm provenance publish fails for private source repos.
+6. Current provenance setting in CI is:
+   - `PU_NPM_PROVENANCE=true`
+   - Publish runs are expected from a public GitHub repo with npm trusted publishing configured.
 
 ## Release Procedure
 
@@ -80,12 +81,12 @@ Expected behavior:
 3. Publish platforms first, wrapper last.
 4. Support explicit platform subset via `PU_NPM_PLATFORMS`.
 
-## Provenance Cutover (When Repo Becomes Public)
+## Provenance Requirements
 
-When repository visibility changes to public and npm trusted publisher is configured:
-
-1. Set `PU_NPM_PROVENANCE=true` in `.github/workflows/release-npm.yml`.
-2. Publish a new version tag (npm versions are immutable).
+1. Repository visibility must be `public`.
+2. npm trusted publisher must be configured for this repository/workflow.
+3. Publish from GitHub Actions tag runs (`Release NPM`) so OIDC provenance is emitted.
+4. If a publish was done without provenance, publish a new higher version tag (npm versions are immutable).
 
 ## Rules
 

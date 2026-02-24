@@ -64,7 +64,7 @@ jobs:
 
       - name: Publish linux-x64 package
         env:
-          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PROVENANCE: "true"
           PU_NPM_PLATFORMS: linux-x64
           PU_NPM_PUBLISH_WRAPPER: "0"
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: Publish darwin-arm64 package
         env:
-          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PROVENANCE: "true"
           PU_NPM_PLATFORMS: darwin-arm64
           PU_NPM_PUBLISH_WRAPPER: "0"
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -130,7 +130,7 @@ jobs:
 
       - name: Publish darwin-x64 package
         env:
-          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PROVENANCE: "true"
           PU_NPM_PLATFORMS: darwin-x64
           PU_NPM_PUBLISH_WRAPPER: "0"
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -162,7 +162,7 @@ jobs:
 
       - name: Publish wrapper package
         env:
-          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PROVENANCE: "true"
           PU_NPM_PLATFORMS: darwin-arm64,darwin-x64,linux-x64
           PU_NPM_PUBLISH_PLATFORMS: "0"
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
