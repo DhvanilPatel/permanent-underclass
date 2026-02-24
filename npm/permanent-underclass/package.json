@@ -1,6 +1,6 @@
 {
   "name": "permanent-underclass",
-  "version": "0.1.0-beta.19",
+  "version": "0.1.0-beta.24",
   "description": "Terminal game about surviving disruption one turn at a time.",
   "license": "MIT",
   "bin": {
@@ -11,8 +11,9 @@
     "README.md"
   ],
   "optionalDependencies": {
-    "permanent-underclass-darwin-arm64": "0.1.0-beta.19",
-    "permanent-underclass-linux-x64": "0.1.0-beta.19"
+    "permanent-underclass-darwin-arm64": "0.1.0-beta.24",
+    "permanent-underclass-darwin-x64": "0.1.0-beta.24",
+    "permanent-underclass-linux-x64": "0.1.0-beta.24"
   },
   "engines": {
     "node": ">=18"
