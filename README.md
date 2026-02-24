@@ -13,11 +13,7 @@ You pick a character, live through a collapsing job market, and try to make it t
 - Short, replayable runs (`simple`: 12 turns, `standard`: 32 turns)
 - Character-specific event pools with different pressure profiles
 - No single correct path; tradeoffs are the point
-- Endings built for screenshots and sharing
-
-## Why It Feels Different
-
-You are not locked to the three presented choices.
+- You are not locked to the three presented choices.
 
 Press `4` and type your own move:
 
