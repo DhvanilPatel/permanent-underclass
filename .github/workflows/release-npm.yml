@@ -104,11 +104,45 @@ jobs:
           NPM_OTP: ${{ secrets.NPM_OTP }}
         run: bash scripts/publish_npm_release.sh "${{ needs.meta.outputs.version }}" "${{ needs.meta.outputs.dist_tag }}"
 
+  publish-darwin-x64:
+    needs: meta
+    runs-on: macos-13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Rust targets
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Prepare release artifacts
+        env:
+          PU_NPM_PLATFORMS: darwin-x64
+        run: bash scripts/prepare_npm_release.sh "${{ needs.meta.outputs.version }}"
+
+      - name: Publish darwin-x64 package
+        env:
+          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PLATFORMS: darwin-x64
+          PU_NPM_PUBLISH_WRAPPER: "0"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_OTP: ${{ secrets.NPM_OTP }}
+        run: bash scripts/publish_npm_release.sh "${{ needs.meta.outputs.version }}" "${{ needs.meta.outputs.dist_tag }}"
+
   publish-wrapper:
     needs:
       - meta
       - publish-linux-x64
       - publish-darwin-arm64
+      - publish-darwin-x64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -123,13 +157,13 @@ jobs:
       - name: Prepare wrapper metadata (no build)
         env:
           PU_NPM_SKIP_BUILD: "1"
-          PU_NPM_PLATFORMS: darwin-arm64,linux-x64
+          PU_NPM_PLATFORMS: darwin-arm64,darwin-x64,linux-x64
         run: bash scripts/prepare_npm_release.sh "${{ needs.meta.outputs.version }}"
 
       - name: Publish wrapper package
         env:
           PU_NPM_PROVENANCE: "false"
-          PU_NPM_PLATFORMS: darwin-arm64,linux-x64
+          PU_NPM_PLATFORMS: darwin-arm64,darwin-x64,linux-x64
           PU_NPM_PUBLISH_PLATFORMS: "0"
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_OTP: ${{ secrets.NPM_OTP }}
