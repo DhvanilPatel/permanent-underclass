@@ -6,6 +6,20 @@ Terminal game about surviving AI acceleration.
 npx --yes permanent-underclass@latest
 ```
 
+## Screenshots
+
+Title screen:
+
+![Permanent Underclass title screen](docs/media/title-screen.png)
+
+Character select:
+
+![Character selection screen](docs/media/character-select.png)
+
+Live turn UI:
+
+![In-run decision screen](docs/media/in-run-turn.png)
+
 ## What This Is
 
 You pick a character, live through a collapsing job market, and try to make it to an ending without going broke or burning out.
@@ -23,20 +37,6 @@ Press `4` and type your own move:
 - `short nvidia`
 
 With LLM mode enabled, your local `codex` or `claude` CLI resolves that action into real in-game consequences.
-
-## Screenshots
-
-Title screen:
-
-![Permanent Underclass title screen](docs/media/title-screen.png)
-
-Character select:
-
-![Character selection screen](docs/media/character-select.png)
-
-Live turn UI:
-
-![In-run decision screen](docs/media/in-run-turn.png)
 
 ## Play
 
