@@ -304,13 +304,13 @@ impl App {
                         let ending = endings::evaluate(&game.state);
                         self.screen = Screen::Ending {
                             ending,
-                            preview_idx: Some(0),
+                            preview_idx: None,
                         };
                     } else {
                         // No game yet — show first ending from catalog
                         self.screen = Screen::Ending {
                             ending: endings::ending_by_id(endings::EndingId::ALL[0]),
-                            preview_idx: Some(0),
+                            preview_idx: None,
                         };
                     }
                     return;
@@ -1327,6 +1327,64 @@ impl App {
     fn stop_title_tone(&mut self) {
         if let Some(tone) = &mut self.title_tone {
             tone.stop();
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::engine::characters::CharacterId;
+    use crate::engine::tempo::Tempo;
+
+    fn key(code: KeyCode) -> KeyEvent {
+        KeyEvent::new(code, KeyModifiers::NONE)
+    }
+
+    fn enter_konami(app: &mut App) {
+        let code = [
+            KeyCode::Up,
+            KeyCode::Up,
+            KeyCode::Down,
+            KeyCode::Down,
+            KeyCode::Left,
+            KeyCode::Right,
+            KeyCode::Left,
+            KeyCode::Right,
+            KeyCode::Char('b'),
+            KeyCode::Char('a'),
+        ];
+        for k in code {
+            app.on_key(key(k));
+        }
+    }
+
+    #[test]
+    fn konami_without_game_enters_non_preview_ending() {
+        let mut app = App::new(None, false, None, Tempo::Simple);
+
+        enter_konami(&mut app);
+
+        match &app.screen {
+            Screen::Ending { preview_idx, .. } => assert_eq!(*preview_idx, None),
+            other => panic!("expected ending screen, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn konami_with_game_enters_non_preview_ending() {
+        let mut app = App::new(None, false, None, Tempo::Simple);
+        app.game = Some(Game::new(
+            Tempo::Simple,
+            CharacterId::new("product_designer"),
+            Some(1),
+        ));
+
+        enter_konami(&mut app);
+
+        match &app.screen {
+            Screen::Ending { preview_idx, .. } => assert_eq!(*preview_idx, None),
+            other => panic!("expected ending screen, got {other:?}"),
         }
     }
 }

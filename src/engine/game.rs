@@ -354,18 +354,21 @@ impl Game {
         let money_scale = self.state.money_scale();
         let stat_scale = self.state.stat_scale();
 
-        let base_decay_per_turn = match self.state.phase() {
+        let base_sanity_decay_per_turn = match self.state.phase() {
             Phase::Early => -1,
             Phase::Mid => -2,
             Phase::Late => -3,
             Phase::Endgame => -3,
         };
+        // Relationships now require upkeep too, but gentler than sanity decay.
+        let base_friends_decay_per_turn = baseline_friends_decay_per_turn(self.state.phase());
 
-        let mut sanity_decay = base_decay_per_turn * stat_scale;
+        let mut sanity_decay = base_sanity_decay_per_turn * stat_scale;
         if self.state.character.matches("plumber") {
             // Plumber gets reduced passive sanity attrition (about half, with floor rounding).
             sanity_decay = sanity_decay.div_euclid(2);
         }
+        let friends_decay = base_friends_decay_per_turn * stat_scale;
 
         let passive = ResourceDelta {
             money: (self.state.income_per_turn
@@ -375,7 +378,7 @@ impl Game {
             sanity: sanity_decay,
             audience: -stat_scale,
             ai_skill: self.state.subscription.ai_fluency_bonus_per_turn() * stat_scale,
-            friends: 0,
+            friends: friends_decay,
         };
         self.state.stats.apply_delta(passive);
 
@@ -809,6 +812,15 @@ fn contains_any(haystack: &str, needles: &[&str]) -> bool {
     needles.iter().any(|n| haystack.contains(n))
 }
 
+fn baseline_friends_decay_per_turn(phase: Phase) -> i32 {
+    match phase {
+        Phase::Early => 0,
+        Phase::Mid => -1,
+        Phase::Late => -1,
+        Phase::Endgame => -2,
+    }
+}
+
 fn is_ai_progress_choice(delta: ResourceDelta) -> bool {
     delta.ai_skill > 0
 }
@@ -1076,5 +1088,13 @@ mod tests {
         assert_eq!(scaled.audience, -20);
         assert_eq!(scaled.ai_skill, 20);
         assert_eq!(scaled.friends, -20);
+    }
+
+    #[test]
+    fn baseline_friends_decay_curve_is_mild() {
+        assert_eq!(baseline_friends_decay_per_turn(Phase::Early), 0);
+        assert_eq!(baseline_friends_decay_per_turn(Phase::Mid), -1);
+        assert_eq!(baseline_friends_decay_per_turn(Phase::Late), -1);
+        assert_eq!(baseline_friends_decay_per_turn(Phase::Endgame), -2);
     }
 }

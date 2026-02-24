@@ -2216,27 +2216,27 @@ fn ending_display_profile(
     ending_id: EndingId,
     preview_idx: Option<usize>,
 ) -> Option<EndingDisplayProfile> {
+    // Prefer the real run profile whenever game state exists, even if a preview
+    // index is active, so "normal" ending context is preserved in active runs.
+    if let Some(game) = app.game.as_ref() {
+        return Some(EndingDisplayProfile {
+            origin_line: crate::engine::endings::origin_line(&game.state).to_string(),
+            turn: game.state.turn,
+            stats: game.state.stats,
+        });
+    }
+
     if preview_idx.is_some() {
         let p = preview_profile_for_ending(ending_id);
         let character_def = CharacterDef::for_character(p.character.clone());
-        let start_cash = character_def.starting_stats.money;
         return Some(EndingDisplayProfile {
-            origin_line: format!(
-                "Preview profile: {} start ${}.",
-                character_def.label.to_uppercase(),
-                start_cash
-            ),
+            origin_line: character_def.origin_line,
             turn: p.turn,
             stats: p.stats,
         });
     }
 
-    let game = app.game.as_ref()?;
-    Some(EndingDisplayProfile {
-        origin_line: crate::engine::endings::origin_line(&game.state).to_string(),
-        turn: game.state.turn,
-        stats: game.state.stats,
-    })
+    None
 }
 
 fn render_ending(
@@ -2998,4 +2998,39 @@ fn push_double_sep(lines: &mut Vec<Line<'static>>, width: u16) {
         ui::repeat_char('\u{2500}', width),
         Style::default().fg(BORDER_HI).bg(BG),
     )]));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::engine::characters::CharacterId;
+    use crate::engine::game::Game;
+
+    #[test]
+    fn ending_profile_prefers_real_run_when_game_exists() {
+        let mut app = App::new(None, false, None, Tempo::Simple);
+        app.game = Some(Game::new(
+            Tempo::Simple,
+            CharacterId::new("product_designer"),
+            Some(1),
+        ));
+
+        let display = ending_display_profile(&app, EndingId::EnlightenedDropout, Some(0))
+            .expect("ending profile should exist with game");
+
+        assert!(!display.origin_line.trim().is_empty());
+        assert!(!display.origin_line.contains("Preview profile:"));
+    }
+
+    #[test]
+    fn ending_profile_preview_mode_uses_character_origin_line() {
+        let app = App::new(None, false, None, Tempo::Simple);
+
+        let character = CharacterDef::for_character(CharacterId::new("product_designer"));
+        let display = ending_display_profile(&app, EndingId::EnlightenedDropout, Some(0))
+            .expect("preview profile should exist");
+
+        assert_eq!(display.origin_line, character.origin_line);
+        assert!(!display.origin_line.contains("Preview profile:"));
+    }
 }

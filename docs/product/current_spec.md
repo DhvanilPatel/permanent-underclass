@@ -55,6 +55,12 @@ Play (simple: ~5-8 min | standard: ~10-15 min) -> Die/End -> Screenshot -> Share
 8. Auto-apply world delta.
 9. Update ticker feed.
 
+Baseline passive drift each turn:
+
+- sanity: Early `-1`, Mid `-2`, Late `-3`, Endgame `-3` (Plumber halves this attrition)
+- audience: `-1`
+- friends: Early `0`, Mid `-1`, Late `-1`, Endgame `-2`
+
 ### Personal Resolution (`Game::resolve_choice` / `Game::apply_freeform`)
 
 Resolution order:
@@ -169,4 +175,3 @@ Current priorities:
 2. Improve memory follow-up coverage for frequently set flags.
 3. Keep universal events as fallback pressure, not primary narrative path.
 4. Maintain command-center-driven visibility into sim outcomes.
-
