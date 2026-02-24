@@ -1,7 +1,7 @@
 {
   "name": "permanent-underclass",
   "version": "0.1.0-beta.19",
-  "description": "Terminal game about surviving the AI transition.",
+  "description": "Terminal game about surviving disruption one turn at a time.",
   "license": "MIT",
   "bin": {
     "permanent-underclass": "bin/permanent-underclass.cjs"

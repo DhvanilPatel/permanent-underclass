@@ -1,5 +1,7 @@
 # permanent-underclass-linux-arm64
 
+Repository: https://github.com/DhvanilPatel/permanent-underclass
+
 Platform binary package for `permanent-underclass` on:
 - Linux arm64
 

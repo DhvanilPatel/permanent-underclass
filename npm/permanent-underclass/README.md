@@ -1,5 +1,7 @@
 # permanent-underclass
 
+Repository: https://github.com/DhvanilPatel/permanent-underclass
+
 Run the game with:
 
 ```bash

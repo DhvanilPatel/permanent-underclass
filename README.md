@@ -1,6 +1,6 @@
 # Permanent Underclass
 
-Terminal game about surviving the AI transition.
+Terminal game about surviving disruption one turn at a time.
 
 ## Quick Start
 
