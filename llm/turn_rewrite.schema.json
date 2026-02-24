@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["world", "personal", "choices"],
+  "properties": {
+    "world": { "$ref": "#/$defs/section" },
+    "personal": { "$ref": "#/$defs/section" },
+    "choices": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/choice" }
+    }
+  },
+  "$defs": {
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "body"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 }
+      }
+    },
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title", "body"],
+      "properties": {
+        "key": { "type": "string", "enum": ["1", "2", "3"] },
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
+

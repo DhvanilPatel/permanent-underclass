@@ -1,0 +1,14 @@
+title = "Permanent Underclass gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Ignore local env and generated/build artifacts"
+paths = [
+  '''(^|/)\.env(\..*)?$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)target/''',
+  '''(^|/)dist/''',
+  '''(^|/)npm/''',
+]

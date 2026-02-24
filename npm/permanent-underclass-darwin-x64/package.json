@@ -1,0 +1,26 @@
+{
+  "name": "permanent-underclass-darwin-x64",
+  "version": "0.1.0-beta.19",
+  "description": "Darwin x64 binary for permanent-underclass",
+  "license": "MIT",
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "bin/permanent-underclass",
+    "data/**/*.jsonl",
+    "data/sfx",
+    "postinstall.cjs",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node postinstall.cjs"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  }
+}

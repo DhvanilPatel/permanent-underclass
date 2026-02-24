@@ -1,0 +1,44 @@
+{"flag": "started_side_project", "group": "career", "label": "SIDE QUEST", "description": "Player started a side project"}
+{"flag": "side_project_shipped", "group": "career", "label": "SHIPPED IT", "description": "Side project reached completion / launched"}
+{"flag": "side_project_failed", "group": "career", "label": "SUNK COST", "description": "Side project collapsed or was abandoned"}
+{"flag": "got_promoted", "group": "career", "label": "PROMOTED FR", "description": "Received a promotion or significant career advancement"}
+{"flag": "got_fired", "group": "career", "label": "PINK SLIPPED", "description": "Was fired or forced out of a position"}
+{"flag": "got_laid_off", "group": "career", "label": "QUIET FIRED", "description": "Was laid off in a restructuring or downsizing"}
+{"flag": "automated_own_job", "group": "career", "label": "CLANKED", "description": "Used AI to automate away own role"}
+{"flag": "went_freelance", "group": "career", "label": "FREE AGENT", "description": "Quit to go independent / freelance"}
+{"flag": "has_mentor", "group": "social", "label": "PADAWAN", "description": "Found or connected with a mentor"}
+{"flag": "became_mentor", "group": "social", "label": "SENSEI", "description": "Started mentoring others"}
+{"flag": "mentor_burned", "group": "social", "label": "TRUST ISSUES", "description": "Mentor relationship fell apart or was betrayed"}
+{"flag": "burned_bridge", "group": "social", "label": "BRIDGE BURNER", "description": "Destroyed an important professional or personal relationship"}
+{"flag": "made_industry_contact", "group": "social", "label": "LINKEDIN BRAIN", "description": "Made a valuable industry connection"}
+{"flag": "built_community", "group": "social", "label": "WAGMI", "description": "Built or led a community (meetup, Discord, open source, etc.)"}
+{"flag": "built_following", "group": "social", "label": "INFLUENCER", "description": "Built a significant online following or audience"}
+{"flag": "took_on_debt", "group": "financial", "label": "IN THE HOLE", "description": "Took on significant debt (loan, credit, bootcamp, etc.)"}
+{"flag": "debt_cleared", "group": "financial", "label": "UNLEVERED", "description": "Paid off or resolved outstanding debt"}
+{"flag": "invested_in_ai", "group": "financial", "label": "AI STONKS", "description": "Made a financial bet on AI (stocks, startup, tools)"}
+{"flag": "lifestyle_crept", "group": "financial", "label": "BOUGIE NOW", "description": "Spending expanded to match income — lifestyle inflation"}
+{"flag": "went_broke_once", "group": "financial", "label": "REKT", "description": "Money hit near-zero at some point during the run"}
+{"flag": "embraced_ai", "group": "identity", "label": "AI PILLED", "description": "Leaned into AI tools, adopted them enthusiastically"}
+{"flag": "rejected_ai", "group": "identity", "label": "LUDDITE MODE", "description": "Refused AI tools, chose to stay manual/analog"}
+{"flag": "sold_out", "group": "identity", "label": "SELLOUT", "description": "Compromised values for money or career advancement"}
+{"flag": "blew_the_whistle", "group": "identity", "label": "WHISTLEBLOWER", "description": "Exposed wrongdoing at personal cost"}
+{"flag": "found_balance", "group": "identity", "label": "SOFT LIFE", "description": "Achieved work-life balance or inner peace"}
+{"flag": "shipped_creative_work", "group": "creative", "label": "MADE SOMETHING", "description": "Published or shipped a creative project (art, writing, music, game)"}
+{"flag": "went_viral", "group": "creative", "label": "MAIN CHARACTER", "description": "A post, project, or moment blew up publicly"}
+{"flag": "got_canceled", "group": "creative", "label": "CANCELED", "description": "Faced public backlash or cancellation"}
+{"flag": "started_newsletter", "group": "creative", "label": "SUBSTACKER", "description": "Started a newsletter, blog, or regular publishing habit"}
+{"flag": "open_sourced", "group": "creative", "label": "GAVE IT AWAY", "description": "Released work as open source or creative commons"}
+{"flag": "collab_with_ai", "group": "creative", "label": "CO-PILOT", "description": "Created something meaningful using AI as a creative partner"}
+{"flag": "plagiarized_by_ai", "group": "creative", "label": "SCRAPED", "description": "Discovered AI was trained on your work without permission"}
+{"flag": "output_is_slop", "group": "creative", "label": "SLOP CANON", "description": "Leaned too hard on AI — output quality tanked"}
+{"flag": "hit_rock_bottom", "group": "crisis", "label": "COOKED", "description": "Reached a low point — financial, emotional, or both"}
+{"flag": "recovered_from_crisis", "group": "crisis", "label": "COMEBACK KID", "description": "Bounced back after hitting rock bottom"}
+{"flag": "took_sabbatical", "group": "crisis", "label": "TOUCHING GRASS", "description": "Stepped away from work for a deliberate break"}
+{"flag": "joined_union", "group": "identity", "label": "UNIONIZED", "description": "Joined or organized a workers' union or collective"}
+{"flag": "started_teaching", "group": "career", "label": "PROFESSOR", "description": "Pivoted into teaching, training, or education"}
+{"flag": "moved_abroad", "group": "crisis", "label": "EXPAT", "description": "Relocated to a different country for cost of living or opportunity"}
+{"flag": "had_health_scare", "group": "crisis", "label": "WAKE UP CALL", "description": "Had a health scare from overwork or neglect"}
+{"flag": "lost_housing", "group": "crisis", "label": "COUCH SURFING", "description": "Lost stable housing — evicted, priced out, or downsized hard"}
+{"flag": "survived_layoff_wave", "group": "crisis", "label": "LAST MAN", "description": "Survived a mass layoff while colleagues were cut"}
+{"flag": "got_scammed", "group": "financial", "label": "RUGGED", "description": "Fell for a scam, lost money or trust"}
+{"flag": "pivoted_career", "group": "career", "label": "PLOT TWIST", "description": "Made a major career change to a different field"}

@@ -1,0 +1,7 @@
+name = "permanent-underclass"
+main = "worker.js"
+compatibility_date = "2026-02-23"
+
+[assets]
+directory = "../../dist/command-center-worker"
+binding = "ASSETS"

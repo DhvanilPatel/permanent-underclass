@@ -1,0 +1,81 @@
+{
+  "version": 4,
+  "declared_standard": {
+    "rows": 5,
+    "cols": 10
+  },
+  "source": {
+    "file": "data/sprites/sprite_library.jsonl",
+    "sha1": "d46a722515ae63b24276d8f422e0d555c9bb5df7"
+  },
+  "palette": {
+    "g": "#00ff41",
+    "a": "#ffb000",
+    "r": "#ff4444",
+    "b": "#4488ff",
+    "p": "#bb88ff",
+    "c": "#00ddff",
+    "y": "#ffdd00",
+    "k": "#ff66aa",
+    "o": "#ff8844",
+    "d": "#334455",
+    "m": "#556677",
+    "w": "#ccddee"
+  },
+  "counts": {
+    "categories": 12,
+    "sprites": 2379,
+    "nonstandard_rows_codepoints": 0,
+    "nonstandard_cols_codepoints": 0
+  },
+  "categories": [
+    {
+      "name": "Tech / Software / Digital",
+      "key": "tech_software_digital"
+    },
+    {
+      "name": "Work / Career / Corporate",
+      "key": "work_career_corporate"
+    },
+    {
+      "name": "People / Social / Relationships",
+      "key": "people_social_relationships"
+    },
+    {
+      "name": "Food / Drink / Lifestyle / Health",
+      "key": "food_drink_lifestyle_health"
+    },
+    {
+      "name": "Emotions / Status Effects",
+      "key": "emotions_status_effects"
+    },
+    {
+      "name": "Economy / Housing / Education",
+      "key": "economy_housing_education"
+    },
+    {
+      "name": "Social Media / Internet Culture",
+      "key": "social_media_internet_culture"
+    },
+    {
+      "name": "Politics / Government / News",
+      "key": "politics_government_news"
+    },
+    {
+      "name": "Health / Medical / Wellness",
+      "key": "health_medical_wellness"
+    },
+    {
+      "name": "Places / Urban Life / Buildings",
+      "key": "places_urban_life_buildings"
+    },
+    {
+      "name": "Nature / Weather / Environment",
+      "key": "nature_weather_environment"
+    },
+    {
+      "name": "Abstract Concepts / Game Mechanics",
+      "key": "abstract_concepts_game_mechanics"
+    }
+  ]
+}

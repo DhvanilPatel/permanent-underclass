@@ -1,0 +1,66 @@
+{
+  "generated_at_epoch_sec": 1771895606,
+  "config": {
+    "model": "text-embedding-3-small",
+    "dimensions": 1536,
+    "max_tags_per_sprite": 4,
+    "allow_generic_tags": false,
+    "choice_text_weight": 0.75,
+    "event_context_weight": 0.25,
+    "choice_axis_weight": 0.0,
+    "choice_candidate_cap": 20
+  },
+  "counts": {
+    "sprites": 2379,
+    "events": 2149,
+    "choices": 6447,
+    "event_mappings": 2149,
+    "choice_mappings": 6447
+  },
+  "coverage": {
+    "event_mapping_pct": 100.0,
+    "choice_mapping_pct": 100.0
+  },
+  "score_summary": {
+    "event_mean": 0.490047,
+    "event_margin_mean": 0.008929,
+    "choice_mean": 0.486853,
+    "choice_margin_mean": -0.002019
+  },
+  "reuse": {
+    "unique_event_sprites": 530,
+    "unique_choice_sprites": 918
+  },
+  "quality": {
+    "events_with_duplicate_event_choice_sprite": 0
+  },
+  "tag_compaction": {
+    "raw_tag_total": 9516,
+    "compact_tag_total": 9516,
+    "avg_raw_tags_per_sprite": 4.0,
+    "avg_compact_tags_per_sprite": 4.0
+  },
+  "input_hashes": {
+    "sprites_file": "/Users/dhvanil/Desktop/permanent-underclass/data/sprites/sprite_library.jsonl",
+    "sprites_sha1": "d46a722515ae63b24276d8f422e0d555c9bb5df7",
+    "events_dir_sha1": "42932715744a5fbbd02e257bd8d0980a0b4cb5ef",
+    "event_files": [
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/ai_researcher.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/angel_investor.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/chief_of_staff.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/crypto_bro.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/digital_nomad.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/ex_faang_engineer.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/hr_lady.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/junior_dev.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/marketing_manager.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/plumber.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/podcaster.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/product_designer.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/product_guy.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/stealth_founder.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/twitter_anon.jsonl",
+      "/Users/dhvanil/Desktop/permanent-underclass/data/events/universal.jsonl"
+    ]
+  }
+}

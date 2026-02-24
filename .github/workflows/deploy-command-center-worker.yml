@@ -1,0 +1,54 @@
+name: Deploy Command Center Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/command-center/**'
+      - 'data/**'
+      - 'scripts/copy_command_center_worker_data.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-command-center-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-command-center-worker
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Validate Cloudflare auth config
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            echo "::error::Missing Cloudflare API token secret. Set CF_API_TOKEN or CLOUDFLARE_API_TOKEN."
+            exit 1
+          fi
+          if [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "::error::Missing Cloudflare account id secret. Set CF_ACCOUNT_ID or CLOUDFLARE_ACCOUNT_ID."
+            exit 1
+          fi
+          npx -y wrangler whoami
+
+      - name: Deploy Worker
+        run: npm run deploy:command-center:worker

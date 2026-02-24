@@ -1,0 +1,32 @@
+# Rust build output
+/target/
+**/*.rs.bk
+
+# OS/editor cruft
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Node (vite dev server)
+node_modules/
+dist/
+
+# Generated npm beta release artifacts
+npm/permanent-underclass-darwin-arm64/bin/permanent-underclass
+npm/permanent-underclass-darwin-arm64/data/sfx/
+npm/permanent-underclass-darwin-arm64/data/**/*.jsonl
+npm/**/*.tgz
+
+# Local secrets
+.env
+
+# Python cache artifacts
+__pycache__/
+*.py[cod]
+
+# Sprite semantics cache (keep committed mappings/metrics only)
+data/sprites/semantics/*
+!data/sprites/semantics/event_sprite_selection.jsonl
+!data/sprites/semantics/choice_sprite_selection.jsonl
+!data/sprites/semantics/metrics.json

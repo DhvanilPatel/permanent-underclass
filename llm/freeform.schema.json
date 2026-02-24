@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "delta", "effects", "narrative", "summary_line"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["money", "sanity", "audience", "ai_skill", "friends"],
+      "properties": {
+        "money": { "type": "integer" },
+        "sanity": { "type": "integer" },
+        "audience": { "type": "integer" },
+        "ai_skill": { "type": "integer" },
+        "friends": { "type": "integer" }
+      }
+    },
+    "effects": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["op", "flag"],
+        "properties": {
+          "op": { "type": "string", "enum": ["set_flag", "clear_flag"] },
+          "flag": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "narrative": { "type": "string", "minLength": 1 },
+    "summary_line": { "type": "string", "minLength": 1 }
+  }
+}

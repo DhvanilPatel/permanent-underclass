@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev:command-center",
+    "dev:command-center": "vite --config apps/command-center/vite.config.js --open /command-center",
+    "build:command-center:worker": "vite build --config apps/command-center/vite.worker.config.js && node scripts/copy_command_center_worker_data.mjs",
+    "dev:command-center:worker": "npm run build:command-center:worker && npx wrangler dev --config apps/command-center/wrangler.toml",
+    "deploy:command-center:worker": "npm run build:command-center:worker && npx wrangler deploy --config apps/command-center/wrangler.toml"
+  },
+  "devDependencies": {
+    "@nivo/bar": "^0.99.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "vite": "^6"
+  }
+}

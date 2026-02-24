@@ -1,0 +1,136 @@
+name: Release NPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      dist_tag: ${{ steps.meta.outputs.dist_tag }}
+    steps:
+      - name: Derive release version and dist-tag
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          if [[ "$version" == *"-beta."* ]]; then
+            dist_tag="beta"
+          else
+            dist_tag="latest"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "dist_tag=$dist_tag" >> "$GITHUB_OUTPUT"
+          echo "Release version: $version"
+          echo "Dist-tag: $dist_tag"
+
+  publish-linux-x64:
+    needs: meta
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Rust targets
+        run: rustup target add x86_64-unknown-linux-gnu
+
+      - name: Install Linux build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev
+
+      - name: Prepare release artifacts
+        env:
+          PU_NPM_PLATFORMS: linux-x64
+        run: bash scripts/prepare_npm_release.sh "${{ needs.meta.outputs.version }}"
+
+      - name: Publish linux-x64 package
+        env:
+          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PLATFORMS: linux-x64
+          PU_NPM_PUBLISH_WRAPPER: "0"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_OTP: ${{ secrets.NPM_OTP }}
+        run: bash scripts/publish_npm_release.sh "${{ needs.meta.outputs.version }}" "${{ needs.meta.outputs.dist_tag }}"
+
+  publish-darwin-arm64:
+    needs: meta
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Rust targets
+        run: rustup target add aarch64-apple-darwin
+
+      - name: Prepare release artifacts
+        env:
+          PU_NPM_PLATFORMS: darwin-arm64
+        run: bash scripts/prepare_npm_release.sh "${{ needs.meta.outputs.version }}"
+
+      - name: Publish darwin-arm64 package
+        env:
+          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PLATFORMS: darwin-arm64
+          PU_NPM_PUBLISH_WRAPPER: "0"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_OTP: ${{ secrets.NPM_OTP }}
+        run: bash scripts/publish_npm_release.sh "${{ needs.meta.outputs.version }}" "${{ needs.meta.outputs.dist_tag }}"
+
+  publish-wrapper:
+    needs:
+      - meta
+      - publish-linux-x64
+      - publish-darwin-arm64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Prepare wrapper metadata (no build)
+        env:
+          PU_NPM_SKIP_BUILD: "1"
+          PU_NPM_PLATFORMS: darwin-arm64,linux-x64
+        run: bash scripts/prepare_npm_release.sh "${{ needs.meta.outputs.version }}"
+
+      - name: Publish wrapper package
+        env:
+          PU_NPM_PROVENANCE: "false"
+          PU_NPM_PLATFORMS: darwin-arm64,linux-x64
+          PU_NPM_PUBLISH_PLATFORMS: "0"
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_OTP: ${{ secrets.NPM_OTP }}
+        run: bash scripts/publish_npm_release.sh "${{ needs.meta.outputs.version }}" "${{ needs.meta.outputs.dist_tag }}"

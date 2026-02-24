@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Permanent Underclass — Command Center</title>
+<style>
+  @font-face {
+    font-family: 'Berkeley Mono';
+    src: local('Berkeley Mono Variable'), local('Berkeley Mono'), local('TX-02'), local('BerkeleyMono-Regular');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  :root {
+    --bg-base: #000000;
+    --bg-panel: #050505;
+    --bg-hover: #0f0f13;
+    --border: #1a1a24;
+    --border-hover: #2a2a35;
+    --border-strong: #22222c;
+    --text-main: #d4d4d8;
+    --text-muted: #71717a;
+    --text-dim: #3f3f46;
+    --accent: #4ade80;
+    
+    --pos: #4ade80;
+    --neg: #f87171;
+    --warn: #fbbf24;
+    --info: #22d3ee;
+    --purp: #c084fc;
+    
+    --font-mono: 'Berkeley Mono Variable', 'Berkeley Mono', 'TX-02', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-mono); }
+  
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+  body {
+    background: var(--bg-base);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.3;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--bg-base);
+    color: var(--text-muted);
+    padding: 16px 24px;
+    font-size: 11px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-strong);
+    flex-shrink: 0;
+  }
+  .topbar .title { color: var(--pos); font-weight: bold; letter-spacing: 0.15em; font-size: 14px; }
+  .topbar .status { color: var(--pos); font-size: 10px; letter-spacing: 0.05em; }
+
+  /* ── Layout ── */
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Top Nav ── */
+  .nav {
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--border-strong);
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .nav button {
+    background: none;
+    border: none;
+    border-right: 1px solid var(--border-strong);
+    border-bottom: 2px solid transparent;
+    padding: 12px 24px;
+    font-family: inherit;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.1s;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+  .nav button:hover { color: var(--text-main); background: var(--bg-panel); }
+  .nav button.active { 
+    color: var(--pos); 
+    background: var(--bg-panel);
+    border-bottom: 2px solid var(--pos);
+    font-weight: bold;
+  }
+
+  /* ── Main Content Area ── */
+  .content { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 16px 24px; 
+    background: var(--bg-base);
+  }
+  
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadein 0.1s ease-out; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── Typography & Headers ── */
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pos);
+    background: var(--bg-panel);
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    margin-top: 24px;
+    border-left: 2px solid var(--pos);
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  /* ── KPI Dashboard ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    background: var(--border-strong);
+    border: 1px solid var(--border-strong);
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--bg-base);
+    padding: 10px 12px;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .kpi:hover { background: var(--bg-hover); }
+  .kpi .number { font-size: 20px; color: var(--warn); margin-bottom: 2px; font-weight: normal; }
+  .kpi .label { font-size: 9px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+
+  /* ── Sim Charts ── */
+  .sim-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--border-strong);
+    border: 1px solid var(--border-strong);
+    margin-bottom: 24px;
+  }
+  .sim-chart-card {
+    background: var(--bg-base);
+    padding: 10px 12px;
+  }
+  .sim-chart-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .sim-bar-row { margin-bottom: 6px; }
+  .sim-bar-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+  .sim-bar-label-row .l {
+    color: var(--text-main);
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 72%;
+  }
+  .sim-bar-label-row .v {
+    color: var(--warn);
+  }
+  .sim-bar-track {
+    width: 100%;
+    height: 10px;
+    background: var(--border);
+    border: 1px solid var(--border-strong);
+    position: relative;
+    overflow: hidden;
+  }
+  .sim-bar-fill {
+    height: 100%;
+    background: var(--info);
+  }
+  .sim-policy-stack {
+    width: 100%;
+    height: 10px;
+    background: var(--border);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    overflow: hidden;
+  }
+  .sim-policy-stack .survive { background: var(--pos); height: 100%; }
+  .sim-policy-stack .death { background: var(--neg); height: 100%; }
+  .sim-policy-legend {
+    margin-top: 8px;
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .sim-policy-legend .survive { color: var(--pos); }
+  .sim-policy-legend .death { color: var(--neg); margin-left: 10px; }
+  .nivo-mount {
+    height: 260px;
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+  }
+  .nivo-empty {
+    height: 260px;
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border-strong);
+    margin-bottom: 24px;
+  }
+  .table-scroll .matrix-table {
+    margin-bottom: 0;
+    min-width: 980px;
+    border: none;
+  }
+  .sim-matrix-main {
+    font-size: 9px;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sim-top-matrix-cell {
+    min-width: 112px;
+    vertical-align: top;
+  }
+  .sim-cell-top-item {
+    margin-bottom: 3px;
+  }
+  .sim-cell-top-item:last-child {
+    margin-bottom: 0;
+  }
+  .sim-cell-top-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    font-size: 8px;
+    line-height: 1.1;
+  }
+  .sim-cell-top-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sim-cell-top-pct {
+    color: var(--text-main);
+    flex-shrink: 0;
+  }
+  .sim-cell-top-track {
+    margin-top: 1px;
+    height: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.015);
+    overflow: hidden;
+  }
+  .sim-cell-top-fill {
+    height: 100%;
+  }
+  .sim-cell-focus {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .sim-cell-focus .sim-cell-top-pct {
+    color: #fff !important;
+    font-weight: 600;
+  }
+  .sim-hover {
+    color: #fff !important;
+  }
+  .sim-hover * {
+    color: #fff !important;
+  }
+  #sim-cp-top6-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-panel);
+  }
+  #sim-cp-top6-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+  #sim-cp-top6-wrap .matrix-table {
+    min-width: 980px;
+  }
+  #sim-cp-top6-table tr > th:first-child {
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #sim-cp-top6-table th:first-child {
+    z-index: 3;
+  }
+
+  /* ── Tables (Matrix & Deltas) ── */
+  .matrix-table, .delta-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    table-layout: fixed;
+    border: 1px solid var(--border-strong);
+  }
+  .matrix-table th, .matrix-table td, .delta-table th, .delta-table td {
+    border: 1px solid var(--border);
+    padding: 6px 8px;
+    text-align: right;
+    font-size: 10px;
+  }
+  .matrix-table th, .delta-table th {
+    background: var(--bg-panel);
+    color: var(--text-muted);
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .matrix-table th:first-child, .delta-table th:first-child,
+  .matrix-table td:first-child, .delta-table td:first-child { text-align: left; background: var(--bg-panel); }
+  
+  .matrix-table td { color: var(--text-main); }
+  .cell-thin { color: var(--neg) !important; font-weight: bold; }
+  .cell-ok { color: var(--pos) !important; }
+  .cell-thick { color: var(--info) !important; }
+
+  /* ── Event Browser Filters ── */
+  .filters {
+    display: flex;
+    gap: 1px;
+    background: var(--border-strong);
+    border: 1px solid var(--border-strong);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .filters input, .filters select, .filters button, .filters .ms-wrapper {
+    font-family: inherit;
+    font-size: 10px;
+    padding: 0;
+    border: none;
+    background: var(--bg-base);
+    color: var(--text-main);
+    flex: 1;
+    min-width: 120px;
+    text-transform: uppercase;
+  }
+  .filters input, .filters select, .filters button { padding: 6px 10px; }
+  .filters button { cursor: pointer; transition: background 0.1s; }
+  .filters button:hover { background: var(--bg-hover); }
+  .filters input { flex: 2; text-transform: none; }
+  .filters input:focus, .filters select:focus, .filters button:focus {
+    outline: none;
+    background: var(--bg-hover);
+  }
+  .filters input::placeholder { color: var(--text-dim); text-transform: uppercase; }
+  .filters .count { 
+    font-size: 10px; color: var(--warn); background: var(--bg-base); 
+    padding: 6px 10px; display: flex; align-items: center; justify-content: center;
+    min-width: 120px; text-transform: uppercase;
+  }
+  
+  /* ── Multi-Select ── */
+  .ms-wrapper { position: relative; }
+  .ms-header { padding: 6px 10px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+  .ms-header:hover { background: var(--bg-hover); }
+  .ms-header::after { content: "▼"; font-size: 8px; color: var(--text-dim); }
+  .ms-dropdown { position: absolute; top: 100%; left: 0; min-width: 100%; background: var(--bg-panel); border: 1px solid var(--border-strong); z-index: 20; display: none; max-height: 300px; overflow-y: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.8); }
+  .ms-wrapper.open .ms-dropdown { display: block; }
+  .ms-option { padding: 6px 10px; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .ms-option:hover { background: var(--bg-hover); }
+  .ms-option.selected { color: var(--pos); }
+  .ms-option.selected::before { content: "[x]"; }
+  .ms-option:not(.selected)::before { content: "[ ]"; color: var(--text-dim); }
+
+  /* ── Phase Sections ── */
+  .event-sections { display: flex; flex-direction: column; gap: 16px; }
+  .phase-section { border: 1px solid var(--border-strong); }
+  .phase-section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 8px; border-bottom: 1px solid var(--border-strong);
+    background: var(--border);
+  }
+  .phase-section-label { font-size: 10px; text-transform: uppercase; color: var(--text-main); font-weight: bold; letter-spacing: 0.05em; }
+  .phase-section-count { font-size: 10px; color: var(--text-muted); }
+  
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border-strong);
+  }
+
+  /* ── Event Cards ── */
+  .event-card {
+    background: var(--bg-base);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.05s;
+  }
+  .event-card:hover { background: var(--bg-hover); }
+  .event-card.open { background: var(--bg-panel); }
+  
+  .event-head {
+    display: flex; align-items: center; gap: 8px; padding: 6px 8px 2px;
+  }
+  .event-class {
+    font-size: 10px;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    padding: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-transform: uppercase;
+  }
+  .event-class::before { content: "["; }
+  .event-class::after { content: "]"; }
+  
+  .event-title-text {
+    font-size: 11px; color: var(--pos); padding: 2px 8px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    line-height: 1.3; font-weight: bold;
+  }
+  
+  .event-meta { display: flex; gap: 4px; flex-wrap: wrap; padding: 2px 8px; }
+  .meta-chip { font-size: 8px; padding: 0 4px; border: 1px solid currentColor; text-transform: uppercase; }
+  .meta-requires { color: var(--info); }
+  .meta-forbids { color: var(--neg); }
+  .meta-effects { color: var(--pos); }
+  .meta-once { color: var(--warn); }
+  
+  .event-choices-inline {
+    display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 8px 8px;
+  }
+  .event-choices-inline .ci {
+    font-size: 9px; color: var(--text-muted); background: var(--border); padding: 1px 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  }
+
+  /* ── Event Detail ── */
+  .event-detail {
+    display: none; padding: 12px; border-top: 1px solid var(--border-strong);
+    background: var(--bg-base);
+  }
+  .event-card.open .event-detail { display: flex; flex-direction: column; gap: 12px; }
+  .event-card.open .event-choices-inline { display: none; }
+  .event-body {
+    border-left: 2px solid var(--text-dim); padding-left: 10px;
+    white-space: pre-wrap; font-size: 11px; color: var(--text-main); line-height: 1.5;
+  }
+  .choices-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); }
+  .choice-card { background: var(--bg-panel); padding: 8px; }
+  .choice-title { color: var(--info); font-size: 11px; margin-bottom: 4px; font-weight: bold; }
+  .choice-delta { font-size: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .delta-pos { color: var(--pos); }
+  .delta-neg { color: var(--neg); }
+  .choice-min-money { font-size: 9px; color: var(--warn); margin-top: 4px; text-transform: uppercase; border: 1px solid var(--warn); display: inline-block; padding: 0 4px; }
+
+  /* ── Headlines ── */
+  .headline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); }
+  .headline-card { background: var(--bg-base); padding: 8px 10px; display: flex; align-items: baseline; gap: 10px; }
+  .headline-card:hover { background: var(--bg-hover); }
+  .headline-index { font-size: 9px; color: var(--text-muted); min-width: 28px; text-align: right; }
+  .headline-text { font-size: 11px; color: var(--text-main); line-height: 1.4; }
+
+  /* ── Endings & Classes ── */
+  .endings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); }
+  .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); }
+  @media (max-width: 800px) {
+    .class-grid { grid-template-columns: 1fr; }
+    .character-card { flex-direction: column; }
+  }
+  .ending-card, .class-card { background: var(--bg-base); padding: 12px; }
+  .ending-card:hover, .class-card:hover { background: var(--bg-hover); }
+  .ending-title, .class-name { font-size: 12px; color: var(--pos); margin-bottom: 4px; text-transform: uppercase; font-weight: bold; }
+  .ending-type {
+    font-size: 9px; text-transform: uppercase; padding: 1px 4px; background: var(--border);
+    display: inline-block; margin-bottom: 8px;
+  }
+  .type-death { color: var(--neg); }
+  .type-secret { color: var(--purp); }
+  .type-class_locked { color: var(--info); }
+  .type-stat_threshold { color: var(--pos); }
+  .type-fallback { color: var(--text-muted); }
+  .type-flag_gated { color: var(--warn); }
+  .ending-body { white-space: pre-wrap; font-size: 10px; color: var(--text-main); line-height: 1.4; }
+  .ending-scoring-meta {
+    margin-top: 8px;
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .ending-scoring-list {
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    display: grid;
+    gap: 4px;
+  }
+  .ending-scoring-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-main);
+  }
+  .ending-scoring-check {
+    color: var(--info);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ending-scoring-points { color: var(--warn); font-weight: bold; white-space: nowrap; }
+  
+  .class-ability { font-size: 10px; color: var(--info); margin-bottom: 8px; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .class-stats { font-size: 10px; }
+  .class-stats .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding: 3px 0; }
+  .class-stats .stat-label { color: var(--text-muted); text-transform: uppercase; }
+  .class-stats .stat-value { color: var(--text-main); font-family: var(--font-mono); }
+  .class-conditions { margin-top: 8px; font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+
+  /* ── Kind bars ── */
+  .kind-bar-row { display: flex; align-items: center; margin-bottom: 4px; font-family: var(--font-mono); }
+  .kind-bar-label { width: 70px; font-size: 9px; text-transform: uppercase; color: var(--text-muted); text-align: right; padding-right: 8px; }
+  .kind-bar { height: 10px; transition: width 0.3s; }
+  .kind-bar-value { font-size: 9px; color: var(--text-dim); padding-left: 8px; }
+
+  /* ── Sprites ── */
+  .sprite-controls { display: flex; gap: 1px; margin-bottom: 16px; background: var(--border-strong); border: 1px solid var(--border-strong); flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  .sprite-controls input, .sprite-controls select, .sprite-controls button {
+    font-family: inherit; font-size: 10px; padding: 6px 12px; border: none;
+    background: var(--bg-base); color: var(--text-main); cursor: pointer; text-transform: uppercase; flex: 1;
+  }
+  .sprite-controls input { text-transform: none; flex: 2; min-width: 120px; }
+  .sprite-controls input:focus, .sprite-controls select:focus { outline: none; background: var(--bg-hover); }
+  .sprite-controls button:hover { background: var(--border); }
+  .sprite-controls button.active { background: var(--warn); color: var(--bg-base); font-weight: bold; }
+  .sprite-controls .count { font-size: 10px; color: var(--warn); background: var(--bg-base); display: flex; align-items: center; justify-content: center; min-width: 100px; }
+  
+  .sprite-category { margin-bottom: 24px; }
+  .sprite-category-title { color: var(--pos); font-size: 10px; text-transform: uppercase; background: var(--bg-panel); padding: 4px 8px; margin-bottom: 8px; letter-spacing: 0.1em; border-left: 2px solid var(--pos); }
+  .sprite-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1px; background: var(--border-strong); border: 1px solid var(--border-strong); }
+  .sprite-card { background: var(--bg-base); padding: 12px 8px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .sprite-card:hover { background: var(--bg-hover); }
+  .sprite-art { font-size: 12px; line-height: 1.1; white-space: pre; margin-bottom: 8px; }
+  .sprite-card .sprite-art span { filter: saturate(0) brightness(0.6); transition: filter 0.1s; }
+  .sprite-card:hover .sprite-art span, body.sprites-color .sprite-card .sprite-art span { filter: saturate(1) brightness(1); }
+  .sprite-name { font-size: 9px; color: var(--text-main); text-transform: uppercase; background: var(--border); padding: 2px 6px; }
+  .sprite-tags { font-size: 8px; color: var(--text-dim); margin-top: 4px; display: none; text-transform: uppercase; }
+  body.sprites-tags .sprite-tags { display: block; }
+  
+  /* Memory badges */
+  .memory-badge { font-size: 9px; padding: 1px 4px; border: 1px solid currentColor; margin-right: 4px; display: inline-block; margin-top: 6px; text-transform: uppercase; }
+  .badge-requires { color: var(--info); }
+  .badge-forbids { color: var(--neg); }
+  .badge-once { color: var(--warn); }
+  .badge-effect { color: var(--pos); }
+
+  /* Sprite Colors */
+  .sg { color: var(--pos); }
+  .sa { color: var(--warn); }
+  .sr { color: var(--neg); }
+  .sb { color: var(--info); }
+  .sp { color: var(--purp); }
+  .sc { color: #22d3ee; }
+  .sy { color: #fef08a; }
+  .sk { color: #f472b6; }
+  .so { color: #fb923c; }
+  .sd { color: var(--text-dim); }
+  .sm { color: var(--text-muted); }
+  .sw { color: var(--text-main); }
+
+  /* Loading */
+  .loading { text-align: center; padding: 60px; color: var(--pos); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .loading .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--pos);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 800px) {
+    .app-container { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="title">Permanent Underclass</span>
+  <span class="status" id="status">Loading...</span>
+</div>
+
+<div class="nav" id="nav">
+  <button class="active" data-panel="dashboard">Dashboard</button>
+  <button data-panel="events">Events</button>
+  <button data-panel="headlines">Headlines</button>
+  <button data-panel="endings">Endings</button>
+  <button data-panel="sim">Sim</button>
+  <button data-panel="characters">Characters</button>
+  <button data-panel="flags">Flags</button>
+  <button data-panel="sprites">Sprites</button>
+</div>
+
+<div class="content">
+  <div class="loading" id="loading"><span class="spinner"></span> Loading game data...</div>
+
+  <!-- ════════ DASHBOARD ════════ -->
+  <div class="panel" id="panel-dashboard">
+    <div class="kpi-row" id="kpis"></div>
+
+    <div class="section-title">Pool Health — Events per Character / Phase</div>
+    <table class="matrix-table" id="pool-matrix"></table>
+
+    <div class="section-title">Delta Magnitude by Phase (normalized: $1k = 1 stat point)</div>
+    <table class="delta-table" id="delta-table"></table>
+
+    <div class="section-title">Memory Hook Coverage</div>
+    <div id="memory-bars" style="margin-bottom: 32px;"></div>
+
+    <div class="section-title">Observations</div>
+    <div id="observations" style="color: var(--text-muted); line-height: 1.6;"></div>
+  </div>
+
+  <!-- ════════ EVENTS ════════ -->
+  <div class="panel" id="panel-events">
+    <div class="filters">
+      <input type="text" id="search" placeholder="Search title or body...">
+      <div class="ms-wrapper" id="filter-character" data-placeholder="Characters"></div>
+      <div class="ms-wrapper" id="filter-phase" data-placeholder="Phases"></div>
+      <div class="ms-wrapper" id="filter-money" data-placeholder="Money"></div>
+      <div class="ms-wrapper" id="filter-memory" data-placeholder="Memory"></div>
+      <button id="btn-toggle-events">Expand All</button>
+      <button id="btn-copy-events">Copy Text</button>
+      <span class="count" id="event-count"></span>
+    </div>
+    <div class="event-sections" id="event-sections"></div>
+  </div>
+
+  <!-- ════════ HEADLINES ════════ -->
+  <div class="panel" id="panel-headlines">
+    <div class="filters">
+      <input type="text" id="headline-search" placeholder="Search headline text...">
+      <select id="headline-phase">
+        <option value="">All Phases</option>
+        <option value="Early">Early</option>
+        <option value="Mid">Mid</option>
+        <option value="Late">Late</option>
+        <option value="Endgame">Endgame</option>
+      </select>
+      <span class="count" id="headline-count"></span>
+    </div>
+    <div class="event-sections" id="headline-sections"></div>
+  </div>
+
+  <!-- ════════ ENDINGS ════════ -->
+  <div class="panel" id="panel-endings">
+    <div class="kpi-row" id="ending-kpis"></div>
+    <div class="section-title" id="ending-signals-title">Ending Signals</div>
+    <table class="matrix-table" id="ending-signal-table"></table>
+    <div class="section-title">Flag Signals</div>
+    <table class="matrix-table" id="ending-flag-table"></table>
+    <div class="section-title" id="ending-list-title">Endings</div>
+    <div class="endings-grid" id="endings-grid"></div>
+  </div>
+
+  <!-- ════════ SIM ════════ -->
+  <div class="panel" id="panel-sim">
+    <div class="kpi-row" id="sim-kpis"></div>
+    <div class="section-title">Nivo Charts</div>
+    <div class="sim-charts">
+      <div class="sim-chart-card">
+        <div class="sim-chart-title">Top Ending Share</div>
+        <div id="sim-ending-chart" class="nivo-mount"></div>
+      </div>
+      <div class="sim-chart-card">
+        <div class="sim-chart-title">Policy Survival Mix</div>
+        <div id="sim-policy-chart" class="nivo-mount"></div>
+      </div>
+      <div class="sim-chart-card">
+        <div class="sim-chart-title">Run End Turn (Completed vs Death)</div>
+        <div id="sim-turn-chart" class="nivo-mount"></div>
+      </div>
+    </div>
+    <div class="section-title">Ending Distribution</div>
+    <table class="matrix-table" id="sim-ending-table"></table>
+    <div class="section-title">Policy Outcomes</div>
+    <table class="matrix-table" id="sim-policy-table"></table>
+    <div class="section-title">Character Outcomes</div>
+    <table class="matrix-table" id="sim-character-table"></table>
+    <div class="section-title">Character × Strategy Matrix (Top 6 Exits)</div>
+    <div class="table-scroll" id="sim-cp-top6-wrap"><table class="matrix-table" id="sim-cp-top6-table"></table></div>
+  </div>
+
+  <!-- ════════ CHARACTERS ════════ -->
+  <div class="panel" id="panel-characters">
+    <div class="section-title">Characters</div>
+    <div class="class-grid" id="character-grid"></div>
+  </div>
+
+  <!-- ════════ FLAGS ════════ -->
+  <div class="panel" id="panel-flags">
+    <div class="section-title">Memory Flag Vocabulary</div>
+    <div id="flag-registry"></div>
+
+    <div class="section-title" style="margin-top: 32px;">Flag Usage Map</div>
+    <div id="flag-map"></div>
+
+    <div class="section-title" style="margin-top: 32px;">Memory Coverage</div>
+    <div id="memory-stats" style="color: var(--text-muted);"></div>
+  </div>
+
+  <!-- ════════ SPRITES ════════ -->
+  <div class="panel" id="panel-sprites">
+    <div class="sprite-controls">
+      <input type="text" id="sprite-search" placeholder="Search name or tags...">
+      <select id="sprite-category"><option value="">All Categories</option></select>
+      <button id="btn-sprite-res">2x</button>
+      <button id="btn-sprite-color">Color</button>
+      <button id="btn-sprite-tags">Tags</button>
+      <span class="count" id="sprite-count"></span>
+    </div>
+    <div id="sprite-library"></div>
+    </div>
+</div>
+</div>
+
+<script type="module" src="./sim_charts.js"></script>
+<script>
+// ── Data loading: fetch JSONL + JSON files directly ──
+
+// Characters, endings, and flags loaded from JSONL data files at runtime
+
+function parseJsonl(text, sourceLabel, { allowComments = false } = {}) {
+  const rows = [];
+  const lines = text.split('\n');
+  for (let idx = 0; idx < lines.length; idx++) {
+    const line = lines[idx].trim();
+    if (!line) continue;
+    if (allowComments && line.startsWith('#')) continue;
+    try {
+      rows.push(JSON.parse(line));
+    } catch (err) {
+      const preview = line.length > 180 ? `${line.slice(0, 180)}...` : line;
+      throw new Error(`${sourceLabel}:${idx + 1}: ${err.message}. Offending line: ${preview}`);
+    }
+  }
+  return rows;
+}
+
+async function loadAllData() {
+  // Load characters from data file
+  const characters = await fetch('/data/characters.jsonl')
+    .then(r => r.ok ? r.text() : '')
+    .then(text => parseJsonl(text, '/data/characters.jsonl', { allowComments: true }))
+    .catch(() => []);
+
+  const catalogToCharacter = new Map(
+    characters
+      .filter(c => typeof c.event_catalog === 'string' && c.event_catalog.length > 0)
+      .map(c => [c.event_catalog, c.id])
+  );
+  const eventCatalogs = [...new Set([...catalogToCharacter.keys(), 'universal'])];
+
+  // Load all event JSONL files in parallel
+  const eventPromises = eventCatalogs.map(async catalog => {
+    const resp = await fetch(`/data/events/${catalog}.jsonl`);
+    if (!resp.ok) return [];
+    const text = await resp.text();
+    const owner = catalog === 'universal' ? 'universal' : (catalogToCharacter.get(catalog) || catalog);
+    return parseJsonl(text, `/data/events/${catalog}.jsonl`, { allowComments: true }).map(ev => {
+      ev.character = owner;
+      return ev;
+    });
+  });
+
+  // Load endings from data file
+  const endingsPromise = fetch('/data/endings.jsonl')
+    .then(r => r.ok ? r.text() : '')
+    .then(text => parseJsonl(text, '/data/endings.jsonl', { allowComments: true }))
+    .catch(() => []);
+
+  // Load ticker headlines (ignore comments in JSONL)
+  const headlinesPromise = fetch('/data/headlines.jsonl')
+    .then(r => r.ok ? r.text() : '')
+    .then(text => parseJsonl(text, '/data/headlines.jsonl', { allowComments: true }))
+    .catch(() => []);
+
+  // Load flags registry
+  const flagsPromise = fetch('/data/flags.jsonl')
+    .then(r => r.ok ? r.text() : '')
+    .then(text => parseJsonl(text, '/data/flags.jsonl', { allowComments: true }))
+    .catch(() => null);
+
+  // Load sprite library
+  const spritesPromise = Promise.all([
+    fetch('/data/sprites/sprite_library.jsonl').then(r => r.text()),
+    fetch('/data/sprites/sprite_library_meta.json').then(r => r.json())
+  ]).then(([text, meta]) => ({
+    sprites: parseJsonl(text, '/data/sprites/sprite_library.jsonl', { allowComments: true }),
+    meta
+  })).catch(() => ({ sprites: [], meta: { categories: [] } }));
+
+  // Load simulation sweep output (optional)
+  const simRunsPromise = fetch('/data/sim/ending_sweep_latest.jsonl')
+    .then(r => r.ok ? r.text() : '')
+    .then(text => parseJsonl(text, '/data/sim/ending_sweep_latest.jsonl', { allowComments: true }))
+    .catch(() => []);
+
+  const [eventArrays, endings, headlines, flagsRegistry, spriteData, simRuns] = await Promise.all([
+    Promise.all(eventPromises),
+    endingsPromise,
+    headlinesPromise,
+    flagsPromise,
+    spritesPromise,
+    simRunsPromise
+  ]);
+
+  const events = eventArrays.flat();
+  return { events, characters, endings, headlines, flags: flagsRegistry, spriteData, simRuns };
+}
+
+// ── Compute stats from raw data ──
+function computeStats(events) {
+  const byCharacter = {}, byPhase = {}, byCharacterPhase = {};
+  let withRequires = 0;
+  let withForbids = 0;
+  let withEffects = 0;
+  let oncePerRun = 0;
+  let totalChoices = 0;
+  events.forEach(ev => {
+    byCharacter[ev.character] = (byCharacter[ev.character] || 0) + 1;
+    byPhase[ev.phase] = (byPhase[ev.phase] || 0) + 1;
+    byCharacterPhase[`${ev.character}:${ev.phase}`] =
+      (byCharacterPhase[`${ev.character}:${ev.phase}`] || 0) + 1;
+    if (ev.requires?.length > 0) withRequires++;
+    if (ev.forbids?.length > 0) withForbids++;
+    if (ev.once_per_run) oncePerRun++;
+    if (ev.choices?.some(c => c.effects?.length > 0)) withEffects++;
+    (ev.choices || []).forEach(c => {
+      totalChoices++;
+    });
+  });
+  return {
+    total: events.length,
+    totalChoices,
+    byCharacter,
+    byPhase,
+    byCharacterPhase,
+    memoryBreakdown: {
+      withRequires,
+      withForbids,
+      withEffects,
+      oncePerRun
+    }
+  };
+}
+
+function computeDeltaStats(events) {
+  const phaseDeltas = {};
+  events.forEach(ev => {
+    if (!phaseDeltas[ev.phase]) phaseDeltas[ev.phase] = [];
+    (ev.choices || []).forEach(c => {
+      const d = c.delta || {};
+      const mag = Math.abs(d.money || 0) / 1000 + Math.abs(d.sanity || 0) + Math.abs(d.audience || 0) + Math.abs(d.ai_skill || 0) + Math.abs(d.friends || 0);
+      phaseDeltas[ev.phase].push(mag);
+    });
+  });
+  const result = {};
+  for (const [phase, mags] of Object.entries(phaseDeltas)) {
+    mags.sort((a, b) => a - b);
+    const n = mags.length;
+    result[phase] = {
+      count: n,
+      min: mags[0],
+      max: mags[n - 1],
+      mean: Math.round(mags.reduce((a, b) => a + b, 0) / n * 10) / 10,
+      median: mags[Math.floor(n / 2)],
+    };
+  }
+  return result;
+}
+
+function collectFlags(events) {
+  const flags = new Set();
+  events.forEach(ev => {
+    (ev.requires || []).forEach(f => flags.add(f));
+    (ev.forbids || []).forEach(f => flags.add(f));
+    (ev.choices || []).forEach(c => {
+      (c.effects || []).forEach(e => flags.add(e.flag));
+    });
+  });
+  return flags;
+}
+
+function esc(value) {
+  const s = value == null ? '' : String(value);
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeClassToken(value) {
+  return String(value == null ? '' : value).replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+
+const FORBIDDEN_HTML_TAGS = new Set(['script', 'iframe', 'object', 'embed', 'link', 'meta', 'base']);
+
+function sanitizeHtmlFragment(value) {
+  const html = value == null ? '' : String(value);
+  const template = document.createElement('template');
+  template.innerHTML = html;
+
+  function scrub(node) {
+    for (const child of Array.from(node.children)) {
+      const tag = child.tagName.toLowerCase();
+      if (FORBIDDEN_HTML_TAGS.has(tag)) {
+        child.remove();
+        continue;
+      }
+
+      for (const attr of Array.from(child.attributes)) {
+        const name = attr.name.toLowerCase();
+        const rawValue = attr.value || '';
+        const lowerValue = rawValue.trim().toLowerCase();
+        if (name.startsWith('on') || name === 'srcdoc') {
+          child.removeAttribute(attr.name);
+          continue;
+        }
+        if ((name === 'href' || name === 'src' || name === 'xlink:href')
+          && (lowerValue.startsWith('javascript:') || lowerValue.startsWith('data:text/html'))) {
+          child.removeAttribute(attr.name);
+          continue;
+        }
+        if (name === 'style' && /(expression\s*\(|javascript:|behavior\s*:)/i.test(rawValue)) {
+          child.removeAttribute(attr.name);
+        }
+      }
+
+      scrub(child);
+    }
+  }
+
+  scrub(template.content);
+  return template.innerHTML;
+}
+
+function setSafeHtml(target, html) {
+  const el = typeof target === 'string' ? document.getElementById(target) : target;
+  if (!el) return;
+  el.innerHTML = sanitizeHtmlFragment(html);
+}
+
+const POLICY_DISPLAY_ORDER = [
+  'balanced',
+  'random',
+  'grind',
+  'rest',
+  'money',
+  'luddite',
+  'hedge',
+  'clout',
+  'social',
+  'survivor',
+  'self-destruct',
+  'hermit',
+  'accelerationist',
+];
+
+function sortPolicies(a, b) {
+  const ai = POLICY_DISPLAY_ORDER.indexOf(String(a));
+  const bi = POLICY_DISPLAY_ORDER.indexOf(String(b));
+  const aRank = ai === -1 ? Number.MAX_SAFE_INTEGER : ai;
+  const bRank = bi === -1 ? Number.MAX_SAFE_INTEGER : bi;
+  if (aRank !== bRank) return aRank - bRank;
+  return String(a).localeCompare(String(b));
+}
+
+function installSimMatrixHover(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const clearHighlight = () => {
+    table.querySelectorAll('.sim-hover').forEach(el => el.classList.remove('sim-hover'));
+    table.querySelectorAll('.sim-cell-focus').forEach(el => el.classList.remove('sim-cell-focus'));
+  };
+  table.onmouseleave = () => clearHighlight();
+  table.onmouseover = event => {
+    const cell = event.target.closest('td.sim-top-matrix-cell');
+    if (!cell || !table.contains(cell)) return;
+    clearHighlight();
+    cell.classList.add('sim-cell-focus');
+
+    const row = cell.parentElement;
+    const colIndex = Array.from(row.children).indexOf(cell);
+    if (colIndex < 1) return;
+
+    const rowHeader = row.querySelector('th');
+    if (rowHeader) rowHeader.classList.add('sim-hover');
+
+    const headerRow = table.querySelector('tr');
+    const colHeader = headerRow && headerRow.children[colIndex];
+    if (colHeader) colHeader.classList.add('sim-hover');
+  };
+}
+
+function fmtCondition(cond) {
+  if (typeof cond === 'string') return cond;
+  if (cond && typeof cond === 'object') {
+    const entry = Object.entries(cond)[0];
+    if (!entry) return JSON.stringify(cond);
+    const [name, payload] = entry;
+    if (payload && typeof payload === 'object' && Number.isFinite(payload.remaining_turns)) {
+      return `${name} (${payload.remaining_turns} turns)`;
+    }
+    return name;
+  }
+  return String(cond);
+}
+
+const ENDING_FIELD_LABELS = {
+  money: 'Money',
+  sanity: 'Sanity',
+  audience: 'Audience',
+  ai_skill: 'AI Skill',
+  friends: 'Friends',
+  turns_recorded: 'Turns Recorded',
+  cash_focus_turns: 'Cash Focus Turns',
+  audience_push_turns: 'Audience Push Turns',
+  ai_push_turns: 'AI Push Turns',
+  recovery_turns: 'Recovery Turns',
+  relationship_turns: 'Relationship Turns',
+  high_pressure_turns: 'High Pressure Turns',
+  cash_focus_pct: 'Cash Focus %',
+  high_pressure_pct: 'High Pressure %',
+  character_is: 'Character',
+  subscription_is: 'Subscription Tier'
+};
+
+function endingFieldType(field) {
+  if (['money', 'sanity', 'audience', 'ai_skill', 'friends'].includes(field)) return 'core stat';
+  if (['character_is', 'subscription_is'].includes(field)) return 'run meta';
+  return 'run pattern';
+}
+
+function splitTopLevelCSV(raw) {
+  const out = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth = Math.max(0, depth - 1);
+    else if (ch === ',' && depth === 0) {
+      out.push(raw.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  const tail = raw.slice(start).trim();
+  if (tail) out.push(tail);
+  return out;
+}
+
+function collectEndingCheckSignals(raw, out) {
+  const s = String(raw || '').trim();
+  if (!s) return;
+
+  const allInner = s.startsWith('all(') && s.endsWith(')') ? s.slice(4, -1) : null;
+  const anyInner = s.startsWith('any(') && s.endsWith(')') ? s.slice(4, -1) : null;
+  if (allInner !== null || anyInner !== null) {
+    const inner = allInner !== null ? allInner : anyInner;
+    splitTopLevelCSV(inner).forEach(part => collectEndingCheckSignals(part, out));
+    return;
+  }
+
+  if (s.startsWith('has_flag:') || s.startsWith('not_flag:')) {
+    const idx = s.indexOf(':');
+    const flag = s.slice(idx + 1).trim();
+    if (flag) out.flags.add(flag);
+    return;
+  }
+
+  if (s.startsWith('character_is:')) {
+    out.fields.add('character_is');
+    return;
+  }
+
+  if (s.startsWith('subscription_is:')) {
+    out.fields.add('subscription_is');
+    return;
+  }
+
+  const betweenMatch = s.match(/^([a-z_]+)\s+between\s+-?\d+\s+-?\d+$/);
+  if (betweenMatch) {
+    out.fields.add(betweenMatch[1]);
+    return;
+  }
+
+  const compareMatch = s.match(/^([a-z_]+)\s*(>=|<=|==|!=|>|<)\s*-?\d+$/);
+  if (compareMatch) {
+    out.fields.add(compareMatch[1]);
+  }
+}
+
+function summarizeEndingSignals(endings) {
+  const scored = endings.filter(e => e.scoring && Array.isArray(e.scoring.conditions));
+  const fieldCounts = new Map();
+  const flagCounts = new Map();
+  let conditionTotal = 0;
+
+  scored.forEach(e => {
+    const fields = new Set();
+    const flags = new Set();
+    const conditions = e.scoring.conditions || [];
+    conditionTotal += conditions.length;
+
+    conditions.forEach(cond => {
+      const check = typeof cond === 'string' ? cond : cond.check;
+      const out = { fields: new Set(), flags: new Set() };
+      collectEndingCheckSignals(check, out);
+      out.fields.forEach(f => fields.add(f));
+      out.flags.forEach(f => flags.add(f));
+    });
+
+    fields.forEach(field => fieldCounts.set(field, (fieldCounts.get(field) || 0) + 1));
+    flags.forEach(flag => flagCounts.set(flag, (flagCounts.get(flag) || 0) + 1));
+  });
+
+  const sortedFieldCounts = [...fieldCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const sortedFlagCounts = [...flagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return {
+    scoredCount: scored.length,
+    conditionTotal,
+    avgConditions: scored.length ? Math.round((conditionTotal / scored.length) * 10) / 10 : 0,
+    fieldCounts: sortedFieldCounts,
+    flagCounts: sortedFlagCounts
+  };
+}
+
+// ── Render everything ──
+function render(data) {
+  const {
+    events,
+    characters,
+    endings,
+    headlines,
+    flags: flagsRegistry,
+    spriteData,
+    simRuns
+  } = data;
+  const stats = computeStats(events);
+  const deltaStats = computeDeltaStats(events);
+  const usedFlags = collectFlags(events);
+  const endingTitleById = new Map(
+    (Array.isArray(endings) ? endings : []).map(e => [String(e.id || ''), String(e.title || e.id || 'Unknown')])
+  );
+  const endingTitle = endingId => endingTitleById.get(String(endingId || '')) || String(endingId || 'Unknown');
+
+  function renderSpriteArt(art) {
+    if (!art || !Array.isArray(art)) return '';
+    return art.map(row =>
+      row.map(seg => {
+        const [text, cls] = Array.isArray(seg) ? seg : [seg, 'd'];
+        return `<span class="s${safeClassToken(cls)}">${esc(text)}</span>`;
+      }).join('')
+    ).join('\n');
+  }
+
+  document.getElementById('loading').style.display = 'none';
+  const simStatus =
+    Array.isArray(simRuns) && simRuns.length > 0 ? ` · ${simRuns.length} sim runs` : '';
+  document.getElementById('status').textContent =
+    `Live — ${stats.total} events · ${headlines.length} headlines${simStatus}`;
+
+  // ── Nav with URL hash persistence ──
+  function switchTab(panel) {
+    const normalized = panel === 'classes' ? 'characters' : panel;
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const btn = document.querySelector(`.nav button[data-panel="${normalized}"]`);
+    if (btn) btn.classList.add('active');
+    const el = document.getElementById('panel-' + normalized);
+    if (el) el.classList.add('active');
+    if (location.hash !== '#' + normalized) history.replaceState(null, '', '#' + normalized);
+  }
+
+  // Restore tab from URL hash or default to dashboard
+  const initialTab = location.hash.replace('#', '') || 'dashboard';
+  switchTab(initialTab);
+
+  document.getElementById('nav').addEventListener('click', e => {
+    if (e.target.tagName !== 'BUTTON') return;
+    switchTab(e.target.dataset.panel);
+  });
+
+  window.addEventListener('hashchange', () => {
+    const tab = location.hash.replace('#', '');
+    if (tab) switchTab(tab);
+  });
+
+  // ── Dashboard: KPIs ──
+  const gated = events.filter(e => e.requires && e.requires.length > 0).length;
+  const opr = events.filter(e => e.once_per_run).length;
+  const withEffects = events.filter(e => e.choices?.some(c => c.effects && c.effects.length > 0)).length;
+  const kpis = [
+    { n: stats.total, l: 'Total Events' },
+    { n: stats.totalChoices, l: 'Total Choices' },
+    { n: headlines.length, l: 'Headlines' },
+    { n: endings.length, l: 'Endings' },
+    { n: characters.length, l: 'Characters' },
+    { n: gated, l: 'Gated Events' },
+    { n: opr, l: 'Once-per-run' },
+    { n: withEffects, l: 'Seed Events' },
+    { n: usedFlags.size, l: 'Flags Used' },
+  ];
+  setSafeHtml('kpis', kpis.map(k =>
+    `<div class="kpi"><div class="number">${k.n}</div><div class="label">${k.l}</div></div>`
+  ).join(''));
+
+  // ── Dashboard: Pool Matrix ──
+  {
+    const phases = ['Any', 'Early', 'Mid', 'Late', 'Endgame'];
+    const characterIds = [...characters.map(c => c.id), 'universal'];
+    let html = '<tr><th></th>' + phases.map(p => `<th>${p}</th>`).join('') + '<th>Total</th></tr>';
+    characterIds.forEach(character => {
+      const label =
+        character === 'universal'
+          ? 'Universal'
+          : characters.find(c => c.id === character)?.label || character;
+      html += `<tr><th style="text-align:left">${esc(label)}</th>`;
+      let total = 0;
+      phases.forEach(p => {
+        const n = stats.byCharacterPhase[`${character}:${p}`] || 0;
+        total += n;
+        const cellClass = n === 0 ? '' : n < 8 ? 'cell-thin' : n > 15 ? 'cell-thick' : 'cell-ok';
+        html += `<td class="${cellClass}">${n}</td>`;
+      });
+      html += `<td style="font-weight:bold">${total}</td></tr>`;
+    });
+    html += '<tr><th style="text-align:left">Total</th>';
+    let grand = 0;
+    phases.forEach(p => { const n = stats.byPhase[p] || 0; grand += n; html += `<td style="font-weight:bold">${n}</td>`; });
+    html += `<td style="font-weight:bold;background:var(--bg-panel)">${grand}</td></tr>`;
+    setSafeHtml('pool-matrix', html);
+  }
+
+  // ── Dashboard: Delta Stats ──
+  {
+    const phases = ['Any', 'Early', 'Mid', 'Late', 'Endgame'];
+    let html = '<tr><th>Phase</th><th>Choices</th><th>Min</th><th>Mean</th><th>Median</th><th>Max</th></tr>';
+    const earlyMean = deltaStats['Early']?.mean;
+    phases.forEach(p => {
+      const d = deltaStats[p];
+      if (!d) return;
+      const flat = earlyMean && Math.abs(d.mean - earlyMean) < 1;
+      html += `<tr><td><strong>${p}</strong></td><td>${d.count}</td><td>${d.min}</td>
+        <td style="color:${flat ? 'var(--neg)' : 'var(--text-main)'};font-weight:bold">${d.mean}</td>
+        <td>${d.median}</td><td>${d.max}</td></tr>`;
+    });
+    setSafeHtml('delta-table', html);
+  }
+
+  // ── Dashboard: Memory Bars ──
+  {
+    const rows = [
+      ['Requires', stats.memoryBreakdown.withRequires],
+      ['Forbids', stats.memoryBreakdown.withForbids],
+      ['Effects', stats.memoryBreakdown.withEffects],
+      ['Once', stats.memoryBreakdown.oncePerRun]
+    ];
+    const maxVal = Math.max(...rows.map(([, v]) => v), 1);
+    const colors = {
+      Requires: 'var(--info)',
+      Forbids: 'var(--warn)',
+      Effects: 'var(--purp)',
+      Once: 'var(--pos)'
+    };
+    setSafeHtml('memory-bars', rows.map(([k, v]) =>
+      `<div class="kind-bar-row">
+        <span class="kind-bar-label">${k}</span>
+        <div class="kind-bar" style="width:${(v / maxVal) * 400}px;background:${colors[k] || 'var(--text-dim)'}"></div>
+        <span class="kind-bar-value">${v} (${Math.round(v / stats.total * 100)}%)</span>
+      </div>`
+    ).join(''));
+  }
+
+  // ── Dashboard: Observations ──
+  {
+    const obs = [];
+    const phases = ['Early', 'Mid', 'Late', 'Endgame'];
+    const means = phases.map(p => deltaStats[p]?.mean || 0);
+    if (Math.max(...means) - Math.min(...means) < 3)
+      obs.push(`\u26a0\ufe0f <strong>Flat progression:</strong> Delta magnitudes are nearly identical across phases (mean ~${means[0]}). Late-game choices don't feel bigger than early-game ones.`);
+    Object.entries(stats.byCharacterPhase).forEach(([k, v]) => { if (v < 8) obs.push(`\u26a0\ufe0f <strong style="color:var(--text-main)">Thin pool:</strong> ${esc(k)} has only ${v} events.`); });
+    obs.push(`\ud83d\udcca <strong style="color:var(--text-main)">Gated events:</strong> ${gated} / ${stats.total} (${Math.round(gated / stats.total * 100)}%). Target: 30-35%.`);
+    obs.push(`\ud83d\udcca <strong style="color:var(--text-main)">Seed events (with effects):</strong> ${withEffects} / ${stats.total}.`);
+    obs.push(`\ud83d\udcca <strong style="color:var(--text-main)">Once-per-run:</strong> ${opr} events. Target: 15-25 tentpole moments.`);
+    setSafeHtml('observations', obs.map(o => `<div style="margin-bottom:8px">${o}</div>`).join(''));
+  }
+
+  // ── Events: Render ──
+  const phaseOrder = ['Early', 'Mid', 'Late', 'Endgame', 'Any'];
+  const phaseRank = Object.fromEntries(phaseOrder.map((p, i) => [p, i]));
+  const characterLabelById = Object.fromEntries(characters.map(c => [c.id, c.label]));
+  const eventCharacterLabel = characterId =>
+    characterId === 'universal' ? 'Universal' : (characterLabelById[characterId] || characterId);
+
+  // Custom Multi-Select setup
+  function createMultiSelect(id, options, onChange) {
+    const wrapper = document.getElementById(id);
+    if (!wrapper) return () => [];
+    const placeholder = wrapper.dataset.placeholder;
+    setSafeHtml(wrapper, `<div class="ms-header"></div><div class="ms-dropdown"></div>`);
+    const header = wrapper.querySelector('.ms-header');
+    const dropdown = wrapper.querySelector('.ms-dropdown');
+    
+    let selected = new Set();
+    
+    function renderMS() {
+      setSafeHtml(dropdown, options.map(opt =>
+        `<div class="ms-option ${selected.has(opt.value) ? 'selected' : ''}" data-val="${esc(opt.value)}">${esc(opt.label)}</div>`
+      ).join(''));
+      setSafeHtml(
+        header,
+        `${esc(placeholder)} ${selected.size === 0 ? '(All)' : `(<span style="color:var(--pos)">${selected.size}</span>)`}`
+      );
+    }
+
+    wrapper.addEventListener('click', e => {
+      const opt = e.target.closest('.ms-option');
+      if (opt) {
+        const val = opt.dataset.val;
+        if (selected.has(val)) selected.delete(val);
+        else selected.add(val);
+        renderMS();
+        onChange();
+      } else if (e.target.closest('.ms-header')) {
+        const isOpen = wrapper.classList.contains('open');
+        document.querySelectorAll('.ms-wrapper.open').forEach(el => el.classList.remove('open'));
+        if (!isOpen) wrapper.classList.add('open');
+      }
+    });
+
+    document.addEventListener('click', e => {
+      if (!wrapper.contains(e.target)) wrapper.classList.remove('open');
+    });
+
+    renderMS();
+    return () => Array.from(selected);
+  }
+
+  const characterOptions = characters.map(c => ({ value: c.id, label: c.label }));
+  characterOptions.push({ value: 'universal', label: 'Universal' });
+
+  const phaseOptions = [
+    { value: 'Early', label: 'Early' },
+    { value: 'Mid', label: 'Mid' },
+    { value: 'Late', label: 'Late' },
+    { value: 'Endgame', label: 'Endgame' },
+    { value: 'Any', label: 'Any' }
+  ];
+
+  const moneyOptions = [
+    { value: 'positive', label: 'Gives Money' },
+    { value: 'negative', label: 'Costs Money' }
+  ];
+
+  const memoryOptions = [
+    { value: 'has_requires', label: 'Has requires' },
+    { value: 'has_forbids', label: 'Has forbids' },
+    { value: 'has_effects', label: 'Has effects' },
+    { value: 'once_per_run', label: 'Once per run' },
+    { value: 'no_memory', label: 'No memory hooks' }
+  ];
+
+  const getCharacters = createMultiSelect('filter-character', characterOptions, () => renderEvents());
+  const getPhases = createMultiSelect('filter-phase', phaseOptions, () => renderEvents());
+  const getMoney = createMultiSelect('filter-money', moneyOptions, () => renderEvents());
+  const getMemory = createMultiSelect('filter-memory', memoryOptions, () => renderEvents());
+
+  let allExpanded = false;
+  let currentFilteredEvents = [];
+
+  function renderEvents() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const selectedCharacters = getCharacters();
+    const selectedPhases = getPhases();
+    const selectedMoney = getMoney();
+    const selectedMemory = getMemory();
+
+    const filtered = events.filter(ev => {
+      if (selectedCharacters.length > 0 && !selectedCharacters.includes(ev.character)) return false;
+      if (selectedPhases.length > 0 && !selectedPhases.includes(ev.phase)) return false;
+      if (search && !ev.title.toLowerCase().includes(search) && !ev.body.toLowerCase().includes(search)) return false;
+      
+      if (selectedMemory.length > 0) {
+        const passMem = selectedMemory.some(m => {
+          if (m === 'has_requires') return ev.requires?.length > 0;
+          if (m === 'has_forbids') return ev.forbids?.length > 0;
+          if (m === 'has_effects') return ev.choices?.some(c => c.effects?.length > 0);
+          if (m === 'once_per_run') return ev.once_per_run;
+          if (m === 'no_memory') return !((ev.requires?.length > 0) || (ev.forbids?.length > 0) || ev.once_per_run || ev.choices?.some(c => c.effects?.length > 0));
+          return false;
+        });
+        if (!passMem) return false;
+      }
+
+      if (selectedMoney.length > 0) {
+        const passMoney = selectedMoney.some(m => {
+          if (m === 'positive') return ev.choices?.some(c => c.delta?.money > 0);
+          if (m === 'negative') return ev.choices?.some(c => c.delta?.money < 0);
+          return false;
+        });
+        if (!passMoney) return false;
+      }
+
+      return true;
+    });
+
+    filtered.sort((a, b) => {
+      const phaseCmp = (phaseRank[a.phase] ?? 99) - (phaseRank[b.phase] ?? 99);
+      if (phaseCmp !== 0) return phaseCmp;
+      const characterCmp = eventCharacterLabel(a.character).localeCompare(eventCharacterLabel(b.character));
+      if (characterCmp !== 0) return characterCmp;
+      return a.title.localeCompare(b.title);
+    });
+
+    currentFilteredEvents = filtered;
+
+    document.getElementById('event-count').textContent = `${filtered.length} / ${stats.total} events`;
+
+    const grouped = { Early: [], Mid: [], Late: [], Endgame: [], Any: [] };
+    filtered.forEach(ev => {
+      grouped[grouped[ev.phase] ? ev.phase : 'Any'].push(ev);
+    });
+
+    const sections = phaseOrder
+      .filter(p => grouped[p].length > 0)
+      .map(p => {
+        const cards = grouped[p].map(ev => {
+          const requiresCount = ev.requires?.length || 0;
+          const forbidsCount = ev.forbids?.length || 0;
+          const effectsCount = (ev.choices || []).reduce((sum, c) => sum + (c.effects?.length || 0), 0);
+          const characterLabel = eventCharacterLabel(ev.character);
+          const inlineChoices = (ev.choices || [])
+            .slice(0, 3)
+            .map(c => {
+              let moneySpan = '';
+              if (c.delta?.money) {
+                const m = c.delta.money;
+                const mClass = m > 0 ? 'delta-pos' : 'delta-neg';
+                const mSign = m > 0 ? '+$' : '-$';
+                moneySpan = ` <span class="${mClass}" style="margin-left:4px; font-weight:bold;">${mSign}${Math.abs(m).toLocaleString()}</span>`;
+              }
+              return `<span class="ci">${esc(c.title)}${moneySpan}</span>`;
+            })
+            .join('');
+
+          const meta = [
+            requiresCount > 0 ? `<span class="meta-chip meta-requires">Req ${requiresCount}</span>` : '',
+            forbidsCount > 0 ? `<span class="meta-chip meta-forbids">Forbid ${forbidsCount}</span>` : '',
+            effectsCount > 0 ? `<span class="meta-chip meta-effects">Fx ${effectsCount}</span>` : '',
+            ev.once_per_run ? '<span class="meta-chip meta-once">Once</span>' : ''
+          ].join('');
+
+          const choicesHtml = (ev.choices || []).map(c => {
+            const d = c.delta || {};
+            let dh = '';
+            if (d.money) dh += `<span class="${d.money > 0 ? 'delta-pos' : 'delta-neg'}">${d.money > 0 ? '+$' : '-$'}${Math.abs(d.money).toLocaleString()}</span> `;
+            ['sanity', 'audience', 'ai_skill', 'friends'].forEach(s => {
+              if (d[s]) dh += `<span class="${d[s] > 0 ? 'delta-pos' : 'delta-neg'}">${s.toUpperCase()} ${d[s] > 0 ? '+' : ''}${d[s]}</span> `;
+            });
+            const effHtml = (c.effects || []).map(e => `<span class="memory-badge badge-effect">${esc(e.op)}: ${esc(e.flag)}</span>`).join('');
+            return `<div class="choice-card">
+              <div class="choice-title">${esc(c.title)}</div>
+              <div class="choice-delta">${dh}</div>
+              ${c.min_money ? `<div class="choice-min-money">Req $${c.min_money.toLocaleString()}</div>` : ''}
+              ${effHtml}
+            </div>`;
+          }).join('');
+
+          return `<article class="event-card${allExpanded ? ' open' : ''}" onclick="this.classList.toggle('open')">
+            <div class="event-head">
+              <span class="event-class">${esc(characterLabel)}</span>
+            </div>
+            <div class="event-title-text">${esc(ev.title)}</div>
+            ${meta ? `<div class="event-meta">${meta}</div>` : ''}
+            <div class="event-choices-inline">${inlineChoices}</div>
+            <div class="event-detail">
+              <div class="event-body">${esc(ev.body)}</div>
+              <div class="choices-grid">${choicesHtml}</div>
+            </div>
+          </article>`;
+        }).join('');
+
+        return `<section class="phase-section phase-${p}">
+          <div class="phase-section-header">
+            <span class="phase-section-label">${p}</span>
+            <span class="phase-section-count">${grouped[p].length} events</span>
+          </div>
+          <div class="phase-grid">${cards}</div>
+        </section>`;
+      }).join('');
+
+    setSafeHtml('event-sections', sections ||
+      '<div style="padding:16px;border:1px solid var(--border);background:var(--bg-panel);color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;text-align:center;">No events match current filters.</div>');
+  }
+
+  document.getElementById('search').addEventListener('input', renderEvents);
+  
+  document.getElementById('btn-toggle-events').addEventListener('click', e => {
+    allExpanded = !allExpanded;
+    e.target.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+    document.querySelectorAll('.event-card').forEach(el => {
+      if (allExpanded) el.classList.add('open');
+      else el.classList.remove('open');
+    });
+  });
+
+  document.getElementById('btn-copy-events').addEventListener('click', e => {
+    const text = currentFilteredEvents.map(ev => JSON.stringify(ev)).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = e.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.color = 'var(--pos)';
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.style.color = '';
+      }, 1500);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  });
+
+  renderEvents();
+
+  // ── Headlines ──
+  {
+    const headlinePhaseOrder = ['Early', 'Mid', 'Late', 'Endgame'];
+
+    function renderHeadlines() {
+      const search = document.getElementById('headline-search').value.toLowerCase();
+      const phase = document.getElementById('headline-phase').value;
+
+      const filtered = headlines.filter(h => {
+        if (phase && h.phase !== phase) return false;
+        if (search && !String(h.text || '').toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      document.getElementById('headline-count').textContent = `${filtered.length} / ${headlines.length} headlines`;
+
+      const grouped = { Early: [], Mid: [], Late: [], Endgame: [] };
+      filtered.forEach(h => {
+        const p = grouped[h.phase] ? h.phase : 'Early';
+        grouped[p].push(h);
+      });
+
+      const sections = headlinePhaseOrder
+        .filter(p => grouped[p].length > 0)
+        .map(p => {
+          const cards = grouped[p].map((h, i) => `<article class="headline-card">
+            <span class="headline-index">#${i + 1}</span>
+            <span class="headline-text">${esc(h.text || '')}</span>
+          </article>`).join('');
+
+          return `<section class="phase-section phase-${p}">
+            <div class="phase-section-header">
+              <span class="phase-section-label">${p}</span>
+              <span class="phase-section-count">${grouped[p].length} headlines</span>
+            </div>
+            <div class="headline-grid">${cards}</div>
+          </section>`;
+        }).join('');
+
+      setSafeHtml('headline-sections', sections ||
+        '<div style="padding:16px;border:1px solid var(--border);background:var(--bg-panel);color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;text-align:center;">No headlines match current filters.</div>');
+    }
+
+    document.getElementById('headline-search').addEventListener('input', renderHeadlines);
+    document.getElementById('headline-phase').addEventListener('change', renderHeadlines);
+    renderHeadlines();
+  }
+
+  // ── Endings ──
+  {
+    const endingSignals = summarizeEndingSignals(endings);
+    const deathCount = endings.filter(e => e.type === 'death').length;
+    const scoredCoverage = endings.length > 0 ? Math.round((endingSignals.scoredCount / endings.length) * 100) : 0;
+    const flagLookup = {};
+    if (flagsRegistry && Array.isArray(flagsRegistry)) {
+      flagsRegistry.forEach(f => { flagLookup[f.flag] = f; });
+    }
+
+    setSafeHtml('ending-kpis', [
+      { n: endings.length, l: 'Total Endings' },
+      { n: endingSignals.scoredCount, l: 'Scored Endings' },
+      { n: `${scoredCoverage}%`, l: 'Scoring Coverage' },
+      { n: deathCount, l: 'Death Endings' },
+      { n: endingSignals.conditionTotal, l: 'Scoring Conditions' },
+      { n: endingSignals.avgConditions, l: 'Avg Cond / Ending' },
+      { n: endingSignals.fieldCounts.length, l: 'Signal Fields' },
+      { n: endingSignals.flagCounts.length, l: 'Signal Flags' }
+    ].map(k => `<div class="kpi"><div class="number">${k.n}</div><div class="label">${k.l}</div></div>`).join(''));
+
+    document.getElementById('ending-signals-title').textContent =
+      `Ending Signals (${endingSignals.scoredCount} scored endings)`;
+
+    setSafeHtml('ending-signal-table',
+      '<tr><th>Signal</th><th>Type</th><th>Endings Using</th><th>Coverage</th></tr>' +
+      endingSignals.fieldCounts.map(([field, count]) => {
+        const label = ENDING_FIELD_LABELS[field] || field;
+        const pct = endingSignals.scoredCount > 0 ? Math.round((count / endingSignals.scoredCount) * 100) : 0;
+        return `<tr>
+          <td style="text-align:left;color:var(--info)">${esc(label)}</td>
+          <td style="text-align:left;color:var(--text-muted);text-transform:uppercase">${endingFieldType(field)}</td>
+          <td>${count}</td>
+          <td>${pct}%</td>
+        </tr>`;
+      }).join(''));
+
+    setSafeHtml('ending-flag-table',
+      '<tr><th>Flag Label</th><th>Flag</th><th>Endings Using</th><th>Coverage</th></tr>' +
+      (endingSignals.flagCounts.length ? endingSignals.flagCounts.map(([flag, count]) => {
+        const label = flagLookup[flag]?.label || flag;
+        const pct = endingSignals.scoredCount > 0 ? Math.round((count / endingSignals.scoredCount) * 100) : 0;
+        return `<tr>
+          <td style="text-align:left;color:var(--pos)">${esc(label)}</td>
+          <td style="text-align:left"><code style="color:var(--text-dim)">${esc(flag)}</code></td>
+          <td>${count}</td>
+          <td>${pct}%</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);text-transform:uppercase">No flag-based ending checks</td></tr>'));
+
+    document.getElementById('ending-list-title').textContent = `Endings (${endings.length})`;
+    setSafeHtml('endings-grid', endings.map(e => {
+      const endingType = e.type || 'unknown';
+      const scoring = e.scoring;
+      const scoringMeta = scoring
+        ? `<div class="ending-scoring-meta">Threshold ${scoring.min_threshold} · Specificity ${scoring.specificity} · ${scoring.conditions.length} conditions</div>`
+        : '<div class="ending-scoring-meta">No scoring (death ending)</div>';
+
+      const scoringConditions = scoring && Array.isArray(scoring.conditions)
+        ? `<div class="ending-scoring-list">${
+            scoring.conditions.map(cond => {
+              const check = typeof cond === 'string' ? cond : cond.check;
+              const points = typeof cond === 'string' ? 0 : (cond.points || 0);
+              const sign = points > 0 ? '+' : '';
+              return `<div class="ending-scoring-item">
+                <code class="ending-scoring-check">${esc(check)}</code>
+                <span class="ending-scoring-points">${sign}${points}</span>
+              </div>`;
+            }).join('')
+          }</div>`
+        : '';
+
+      return `<div class="ending-card">
+        <div class="ending-title">${esc(e.title)}</div>
+        <span class="ending-type type-${safeClassToken(endingType)}">${esc(String(endingType).replace('_', ' '))}</span>
+        <div class="ending-body">${esc(e.body)}</div>
+        ${scoringMeta}
+        ${scoringConditions}
+      </div>`;
+    }).join(''));
+  }
+
+  // ── Sim ──
+  {
+    const rows = Array.isArray(simRuns) ? simRuns : [];
+    const endingTitles = Object.fromEntries(endingTitleById.entries());
+    window.__PU_SIM_ROWS = rows;
+    window.__PU_ENDING_TITLES = endingTitles;
+    window.dispatchEvent(new CustomEvent('pu:sim-data', { detail: { rows, endingTitles } }));
+
+    const isDeathRow = r => {
+      if (typeof r.is_death === 'boolean') return r.is_death;
+      const ending = String(r.ending || '');
+      return ending === 'Broke' || ending === 'BurnedOut';
+    };
+
+    if (!rows.length) {
+      setSafeHtml('sim-kpis', [
+        { n: 0, l: 'Runs Loaded' },
+        { n: '-', l: 'Death Rate' },
+        { n: '-', l: 'Policies' },
+        { n: '-', l: 'Characters' }
+      ].map(k => `<div class="kpi"><div class="number">${k.n}</div><div class="label">${k.l}</div></div>`).join(''));
+
+      const emptyRow = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);text-transform:uppercase">No sim file loaded. Generate data/sim/ending_sweep_latest.jsonl.</td></tr>';
+      setSafeHtml('sim-ending-table', '<tr><th>Ending</th><th>Runs</th><th>Share</th><th>Death</th></tr>' + emptyRow);
+      setSafeHtml('sim-policy-table', '<tr><th>Policy</th><th>Runs</th><th>Survive</th><th>Avg Turn</th></tr>' + emptyRow);
+      setSafeHtml('sim-character-table', '<tr><th>Character</th><th>Runs</th><th>Survive</th><th>Avg Turn</th></tr>' + emptyRow);
+      const matrixEmpty = '<tr><td colspan="2" style="text-align:center;color:var(--text-dim);text-transform:uppercase">No sim file loaded.</td></tr>';
+      setSafeHtml('sim-cp-top6-table', matrixEmpty);
+    } else {
+      const total = rows.length;
+      const endingsMap = new Map();
+      const policyMap = new Map();
+      const characterMap = new Map();
+      const comboMap = new Map();
+      const policySet = new Set();
+      const characterSet = new Set();
+
+      rows.forEach(r => {
+        const ending = String(r.ending || 'Unknown');
+        const policy = String(r.policy || 'unknown');
+        const character = String(r.character || 'unknown');
+        const turn = Number(r.turn || 0);
+        const death = isDeathRow(r);
+
+        policySet.add(policy);
+        characterSet.add(character);
+
+        const endingAgg = endingsMap.get(ending) || { runs: 0, deaths: 0 };
+        endingAgg.runs += 1;
+        if (death) endingAgg.deaths += 1;
+        endingsMap.set(ending, endingAgg);
+
+        const policyAgg = policyMap.get(policy) || { runs: 0, survive: 0, turnSum: 0 };
+        policyAgg.runs += 1;
+        if (!death) policyAgg.survive += 1;
+        policyAgg.turnSum += turn;
+        policyMap.set(policy, policyAgg);
+
+        const characterAgg = characterMap.get(character) || { runs: 0, survive: 0, turnSum: 0, endings: new Map() };
+        characterAgg.runs += 1;
+        if (!death) characterAgg.survive += 1;
+        characterAgg.turnSum += turn;
+        characterAgg.endings.set(ending, (characterAgg.endings.get(ending) || 0) + 1);
+        characterMap.set(character, characterAgg);
+
+        const comboKey = `${character}::${policy}`;
+        const comboAgg = comboMap.get(comboKey) || {
+          runs: 0,
+          endings: new Map()
+        };
+        comboAgg.runs += 1;
+        comboAgg.endings.set(ending, (comboAgg.endings.get(ending) || 0) + 1);
+        comboMap.set(comboKey, comboAgg);
+      });
+
+      const deathCount = rows.filter(isDeathRow).length;
+      const surviveCount = total - deathCount;
+
+      setSafeHtml('sim-kpis', [
+        { n: total, l: 'Runs Loaded' },
+        { n: `${Math.round((deathCount / total) * 100)}%`, l: 'Death Rate' },
+        { n: `${Math.round((surviveCount / total) * 100)}%`, l: 'Survive Rate' },
+        { n: policySet.size, l: 'Policies' },
+        { n: characterSet.size, l: 'Characters' },
+        { n: endingsMap.size, l: 'Endings Seen' }
+      ].map(k => `<div class="kpi"><div class="number">${k.n}</div><div class="label">${k.l}</div></div>`).join(''));
+
+      const endingRows = [...endingsMap.entries()]
+        .sort((a, b) => b[1].runs - a[1].runs || a[0].localeCompare(b[0]))
+        .map(([ending, agg]) => {
+          const share = Math.round((agg.runs / total) * 1000) / 10;
+          const allDeath = agg.deaths === agg.runs;
+          const deathLabel = allDeath ? 'yes' : (agg.deaths > 0 ? 'mixed' : 'no');
+          const deathColor = allDeath ? 'var(--neg)' : (agg.deaths > 0 ? 'var(--warn)' : 'var(--pos)');
+          return `<tr>
+            <td style="text-align:left;color:var(--info)">${esc(endingTitle(ending))}</td>
+            <td>${agg.runs}</td>
+            <td>${share}%</td>
+            <td style="text-transform:uppercase;color:${deathColor}">${deathLabel}</td>
+          </tr>`;
+        }).join('');
+      setSafeHtml('sim-ending-table',
+        '<tr><th>Ending</th><th>Runs</th><th>Share</th><th>Death</th></tr>' + endingRows);
+
+      const policyRows = [...policyMap.entries()]
+        .sort((a, b) => sortPolicies(a[0], b[0]))
+        .map(([policy, agg]) => {
+          const survivePct = Math.round((agg.survive / agg.runs) * 1000) / 10;
+          const avgTurn = Math.round((agg.turnSum / agg.runs) * 100) / 100;
+          return `<tr>
+            <td style="text-align:left;color:var(--pos)">${esc(policy)}</td>
+            <td>${agg.runs}</td>
+            <td>${survivePct}%</td>
+            <td>${avgTurn}</td>
+          </tr>`;
+        }).join('');
+      setSafeHtml('sim-policy-table',
+        '<tr><th>Policy</th><th>Runs</th><th>Survive</th><th>Avg Turn</th></tr>' + policyRows);
+
+      const characterRows = [...characterMap.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([character, agg]) => {
+          const survivePct = Math.round((agg.survive / agg.runs) * 1000) / 10;
+          const avgTurn = Math.round((agg.turnSum / agg.runs) * 100) / 100;
+          return `<tr>
+            <td style="text-align:left;color:var(--warn)">${esc(character)}</td>
+            <td>${agg.runs}</td>
+            <td>${survivePct}%</td>
+            <td>${avgTurn}</td>
+          </tr>`;
+        }).join('');
+      setSafeHtml('sim-character-table',
+        '<tr><th>Character</th><th>Runs</th><th>Survive</th><th>Avg Turn</th></tr>' + characterRows);
+
+      const allStrategiesLabel = 'all-strategies';
+      const policies = [...policySet].sort(sortPolicies);
+      const displayPolicies = [allStrategiesLabel, ...policies];
+      const characters = [...characterSet].sort((a, b) => a.localeCompare(b));
+      const top6Header = `<tr><th>Character × Strategy</th>${displayPolicies.map(p => `<th>${esc(p)}</th>`).join('')}</tr>`;
+      const top6Body = characters.map(character => {
+        const cells = displayPolicies.map(policy => {
+          const combo = policy === allStrategiesLabel
+            ? (() => {
+                const agg = characterMap.get(character);
+                return agg ? { runs: agg.runs, endings: agg.endings } : null;
+              })()
+            : comboMap.get(`${character}::${policy}`);
+          if (!combo) {
+            return '<td class="sim-top-matrix-cell"><div class="sim-matrix-main">-</div></td>';
+          }
+          const topSix = [...combo.endings.entries()]
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .slice(0, 6);
+          const lines = Array.from({ length: 6 }, (_, idx) => {
+            const pair = topSix[idx];
+            if (!pair) {
+              return `<div class="sim-cell-top-item">
+                <div class="sim-cell-top-head">
+                  <span class="sim-cell-top-name">-</span>
+                  <span class="sim-cell-top-pct">0%</span>
+                </div>
+                <div class="sim-cell-top-track"><div class="sim-cell-top-fill" style="width:0%;background:var(--text-dim)"></div></div>
+              </div>`;
+            }
+            const [ending, count] = pair;
+            const share = Math.round((count / combo.runs) * 1000) / 10;
+            const isDeathEnding = ending === 'Broke' || ending === 'BurnedOut';
+            const tone = isDeathEnding ? 'var(--neg)' : 'var(--info)';
+            return `<div class="sim-cell-top-item">
+              <div class="sim-cell-top-head">
+                <span class="sim-cell-top-name" style="color:${tone}">${esc(endingTitle(ending))}</span>
+                <span class="sim-cell-top-pct">${share}%</span>
+              </div>
+              <div class="sim-cell-top-track"><div class="sim-cell-top-fill" style="width:${share}%;background:${tone}"></div></div>
+            </div>`;
+          }).join('');
+          return `<td class="sim-top-matrix-cell">${lines}</td>`;
+        }).join('');
+        return `<tr><th style="text-align:left">${esc(character)}</th>${cells}</tr>`;
+      }).join('');
+      setSafeHtml('sim-cp-top6-table', top6Header + top6Body);
+      installSimMatrixHover('sim-cp-top6-table');
+    }
+  }
+
+  // ── Characters ──
+  setSafeHtml('character-grid', characters.map(c => {
+    const s = c.starting_stats;
+    const p = c.presentation || {};
+    const startingConditions = (c.starting_conditions || []).map(fmtCondition);
+    
+    // Find sprite
+    let spriteArt = '';
+    if (p.sprite_style && spriteData && spriteData.sprites) {
+      const sprite = spriteData.sprites.find(sp => sp.id === p.sprite_style || sp.name === p.sprite_style);
+      if (sprite && sprite['2x']) {
+        spriteArt = renderSpriteArt(sprite['2x']);
+      } else if (sprite && sprite['1x']) {
+        spriteArt = renderSpriteArt(sprite['1x']);
+      }
+    }
+
+    return `<div class="class-card character-card" style="display: flex; gap: 16px; align-items: flex-start; padding: 16px;">
+      ${spriteArt ? `<div style="flex-shrink: 0; background: var(--bg-base); padding: 12px; border: 1px solid var(--border);"><pre class="sprite-art" style="margin: 0; font-size: 10px; line-height: 1.1;">${spriteArt}</pre></div>` : ''}
+      <div style="flex: 1; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+          <div class="class-name" style="font-size: 14px; margin: 0;">${esc(c.label)}</div>
+          ${p.tag ? `<div style="font-size: 9px; color: var(--warn); border: 1px solid var(--warn); padding: 1px 4px; text-transform: uppercase;">${esc(p.tag)}</div>` : ''}
+        </div>
+        <div style="font-size: 10px; color: var(--info); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-weight: bold;">Ability: ${esc(c.ability)}</div>
+        
+        <div style="font-size: 11px; color: var(--text-main); margin-bottom: 8px; line-height: 1.4; font-style: italic;">${p.quote ? esc(p.quote) : ''}</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4;">${esc(c.description)}</div>
+        <div style="font-size: 10px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.4;">${p.backstory ? esc(p.backstory) : ''}</div>
+        
+        <div class="class-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 12px;">
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">Money</div><div style="color:var(--pos);font-size:12px;">$${s.money.toLocaleString()}</div></div>
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">Income</div><div style="color:var(--pos);font-size:12px;">+$${c.starting_income_per_turn.toLocaleString()}</div></div>
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">Sanity</div><div style="color:var(--text-main);font-size:12px;">${s.sanity}</div></div>
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">Audience</div><div style="color:var(--text-main);font-size:12px;">${s.audience}</div></div>
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">AI Skill</div><div style="color:var(--text-main);font-size:12px;">${s.ai_skill}</div></div>
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">Friends</div><div style="color:var(--text-main);font-size:12px;">${s.friends}</div></div>
+          <div><div style="color:var(--text-muted);font-size:9px;text-transform:uppercase;">Events</div><div style="color:var(--info);font-size:12px;font-weight:bold;">${stats.byCharacter[c.id] || 0}</div></div>
+        </div>
+        ${startingConditions.length ? `<div class="class-conditions" style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border);">Starts with: ${startingConditions.map(sc => esc(sc)).join(', ')}</div>` : ''}
+      </div>
+    </div>`;
+  }).join(''));
+
+  // ── Flags ──
+  {
+    // Show registry if it exists
+    if (flagsRegistry && Array.isArray(flagsRegistry) && flagsRegistry.length > 0) {
+      const groups = {};
+      flagsRegistry.forEach(f => {
+        const group = f.group || 'Other';
+        if (!groups[group]) groups[group] = [];
+        groups[group].push(f);
+      });
+      let html = '';
+      for (const [group, flagList] of Object.entries(groups).sort()) {
+        html += `<div style="margin-bottom:24px">
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:6px">${esc(group)}</div>`;
+        flagList.forEach(f => {
+          const setBy = events.filter(ev => ev.choices?.some(c => c.effects?.some(e => e.flag === f.flag && e.op === 'set_flag'))).length;
+          const reqBy = events.filter(ev => ev.requires?.includes(f.flag)).length;
+          const usage = setBy + reqBy > 0
+            ? `${setBy} set · ${reqBy} req`
+            : 'unused';
+          const usageColor = setBy + reqBy > 0 ? 'var(--text-dim)' : 'var(--border-hover)';
+          html += `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;display:flex;align-items:baseline;gap:16px">
+            <span style="font-weight:bold;color:var(--pos);min-width:180px">${esc(f.label || f.flag)}</span>
+            <code style="font-size:10px;color:var(--text-dim);min-width:200px">${esc(f.flag)}</code>
+            <span style="color:var(--text-muted);flex:1">${esc(f.description || '')}</span>
+            <span style="color:${usageColor};font-size:10px;white-space:nowrap;text-transform:uppercase;letter-spacing:0.05em">${usage}</span>
+          </div>`;
+        });
+        html += '</div>';
+      }
+      setSafeHtml('flag-registry', html);
+    } else {
+      setSafeHtml('flag-registry', '<p style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">No data/flags.jsonl found or empty.</p>');
+    }
+
+    // Flag usage from events (even without registry)
+    if (usedFlags.size > 0) {
+      const flagLookup = {};
+      if (flagsRegistry && Array.isArray(flagsRegistry)) flagsRegistry.forEach(f => { flagLookup[f.flag] = f; });
+      let html = '<table class="matrix-table"><tr><th>Label</th><th>Flag</th><th>Set by</th><th>Required by</th><th>Forbidden by</th></tr>';
+      [...usedFlags].sort().forEach(flag => {
+        const meta = flagLookup[flag];
+        const label = meta?.label || flag;
+        const setBy = events.filter(ev => ev.choices?.some(c => c.effects?.some(e => e.flag === flag && e.op === 'set_flag'))).length;
+        const reqBy = events.filter(ev => ev.requires?.includes(flag)).length;
+        const forbBy = events.filter(ev => ev.forbids?.includes(flag)).length;
+        html += `<tr><td style="text-align:left;color:var(--pos);font-weight:bold;">${esc(label)}</td><td style="text-align:left"><code style="color:var(--text-dim)">${esc(flag)}</code></td><td>${setBy}</td><td>${reqBy}</td><td>${forbBy}</td></tr>`;
+      });
+      html += '</table>';
+      setSafeHtml('flag-map', html);
+    } else {
+      setSafeHtml('flag-map', '<p style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">No flags in use yet.</p>');
+    }
+
+    // Memory coverage
+    const withMemory = events.filter(e =>
+      (e.requires?.length > 0) || (e.forbids?.length > 0) || e.once_per_run || e.choices?.some(c => c.effects?.length > 0)
+    ).length;
+    setSafeHtml('memory-stats', `
+      <div>${withMemory} / ${stats.total} events have memory hooks (${Math.round(withMemory / stats.total * 100)}%)</div>
+    `);
+  }
+
+  // ── Sprites ──
+  {
+    const { sprites, meta } = spriteData;
+
+    // Populate category filter
+    const catSelect = document.getElementById('sprite-category');
+    (meta.categories || []).forEach(c => catSelect.add(new Option(c.name, c.name)));
+
+
+
+    function renderSprites() {
+      const search = document.getElementById('sprite-search').value.toLowerCase();
+      const cat = document.getElementById('sprite-category').value;
+
+      let filtered = sprites;
+      if (cat) filtered = filtered.filter(s => s.category === cat);
+      if (search) filtered = filtered.filter(s =>
+        s.name.toLowerCase().includes(search) ||
+        (s.tags || []).some(t => t.includes(search))
+      );
+
+      document.getElementById('sprite-count').textContent = `${filtered.length} / ${sprites.length} sprites`;
+
+      // Group by category
+      const groups = {};
+      filtered.forEach(s => {
+        const c = s.category || 'Other';
+        if (!groups[c]) groups[c] = [];
+        groups[c].push(s);
+      });
+
+      const catOrder = (meta.categories || []).map(c => c.name);
+      const sorted = Object.entries(groups).sort((a, b) => {
+        const ai = catOrder.indexOf(a[0]), bi = catOrder.indexOf(b[0]);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
+      setSafeHtml('sprite-library', sorted.map(([catName, items]) =>
+        `<div class="sprite-category">
+          <div class="sprite-category-title">${esc(catName)} (${items.length})</div>
+          <div class="sprite-grid">
+            ${items.map(s => `<div class="sprite-card">
+              <pre class="sprite-art" ${spriteRes === '1x' ? 'style="font-size:6px;line-height:6px;"' : ''}>${renderSpriteArt(s[spriteRes])}</pre>
+              <div class="sprite-name">${esc(s.name)}</div>
+              <div class="sprite-tags">${(s.tags || []).map(t => esc(t)).join(' \u00b7 ')}</div>
+            </div>`).join('')}
+          </div>
+        </div>`
+      ).join(''));
+    }
+
+    document.getElementById('sprite-search').addEventListener('input', renderSprites);
+    document.getElementById('sprite-category').addEventListener('change', renderSprites);
+    let spriteRes = '2x';
+    document.getElementById('btn-sprite-res').addEventListener('click', e => {
+      spriteRes = spriteRes === '2x' ? '1x' : '2x';
+      e.target.textContent = spriteRes;
+      e.target.classList.toggle('active', spriteRes === '1x');
+      renderSprites();
+    });
+    document.getElementById('btn-sprite-color').addEventListener('click', e => {
+      document.body.classList.toggle('sprites-color');
+      e.target.classList.toggle('active');
+    });
+    document.getElementById('btn-sprite-tags').addEventListener('click', e => {
+      document.body.classList.toggle('sprites-tags');
+      e.target.classList.toggle('active');
+    });
+
+    renderSprites();
+
+    // Update status with sprite count
+    document.getElementById('status').textContent = `Live — ${stats.total} events · ${headlines.length} headlines · ${sprites.length} sprites`;
+  }
+}
+
+// ── Boot ──
+loadAllData().then(render).catch(err => {
+  setSafeHtml('loading', `<span style="color:var(--neg)">Failed to load data: ${esc(err && err.message ? err.message : String(err))}</span><br><br>
+    <span style="color:var(--text-muted)">Make sure you're running a dev server from the project root:<br><code style="color:var(--text-main);margin-top:8px;display:inline-block;padding:4px 8px;background:var(--border);border-radius:2px;">npm run dev</code></span>`);
+});
+</script>
+</body>
+</html>
