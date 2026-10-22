@@ -5,15 +5,18 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   rust-checks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           components: rustfmt, clippy
 
@@ -26,30 +29,30 @@ jobs:
         run: cargo fmt --check
 
       - name: Cargo clippy (strict)
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings
 
       - name: Cargo test (lib)
-        run: cargo test --lib
+        run: cargo test --locked --lib --test content_schema
 
       - name: Cargo test (sim)
-        run: cargo test --test sim
+        run: cargo test --locked --test sim
 
   security-checks:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
 
       - name: Secret pattern scan
         run: |
@@ -61,10 +64,14 @@ jobs:
           fi
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@cargo-audit
+        uses: taiki-e/install-action@8b0909b8902031c9ed62abc2387ebd6120876869 # cargo-audit
+        with:
+          tool: cargo-audit
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@cargo-deny
+        uses: taiki-e/install-action@7ff3827688bd742ffc0b597ab1bf503967134e46 # cargo-deny
+        with:
+          tool: cargo-deny
 
       - name: Cargo audit
         run: timeout 180 cargo audit
@@ -73,7 +80,7 @@ jobs:
         run: cargo deny check advisories
 
       - name: Gitleaks scan
-        uses: DariuszPorowski/github-action-gitleaks@v2
+        uses: DariuszPorowski/github-action-gitleaks@a027585cb1f2780aa441f20f4d0aabf8b1a0d90e # v2
         with:
           config: .gitleaks.toml
           no_git: true
@@ -81,5 +88,8 @@ jobs:
           redact: true
           verbose: true
 
-      - name: npm audit (prod)
-        run: npm audit --omit=dev
+      - name: Install npm dependencies
+        run: npm ci --ignore-scripts
+
+      - name: npm audit (including build tools)
+        run: npm audit --audit-level=high

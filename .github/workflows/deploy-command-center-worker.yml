@@ -27,15 +27,15 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
 
       - name: Install deps
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Validate Cloudflare auth config
         run: |
@@ -48,7 +48,7 @@ jobs:
             echo "::error::Missing Cloudflare account id secret. Set CF_ACCOUNT_ID or CLOUDFLARE_ACCOUNT_ID."
             exit 1
           fi
-          npx -y wrangler whoami
+          npx --no-install wrangler whoami
 
       - name: Deploy Worker
         run: npm run deploy:command-center:worker

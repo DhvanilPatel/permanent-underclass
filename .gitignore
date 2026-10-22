@@ -30,3 +30,6 @@ data/sprites/semantics/*
 !data/sprites/semantics/event_sprite_selection.jsonl
 !data/sprites/semantics/choice_sprite_selection.jsonl
 !data/sprites/semantics/metrics.json
+
+# Local Cloudflare build and preview state
+.wrangler/
